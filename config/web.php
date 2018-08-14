@@ -59,8 +59,7 @@ $config = [
                 'register' => '/home/register',
                 'register-step2' => '/home/register-step2',
                 'getSplash' => 'home/splash',
-                '
-                social-login' => 'home/social-login',
+                'social-login' => 'home/social-login',
                 ],
         ],
 
