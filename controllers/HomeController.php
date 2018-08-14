@@ -19,7 +19,7 @@ use yii\web\Application;
 use app\models\Users;
 use app\models\UserInfo;
 use app\models\DeviceLocation;
-
+use yii\web\UploadedFile;
 
 class HomeController extends ActiveController
 {
@@ -58,6 +58,12 @@ class HomeController extends ActiveController
 //          MD5 hash for admin@123 is : e6e061838856bf47e1de730719fb2609
         $model->user_token = md5(uniqid($model->user_id, true));
         if ($model->save()) {
+            $device = new DeviceLocation();
+            $device->attributes = $request;
+            $device->user_id = $model->user_id;
+            $device->created_date = date('Y-m-d H:i:s');
+            $device->modified_date = date('Y-m-d H:i:s');
+            $device->save();
             $result = [
                 "code" => 200,
                 "message" => "success",
@@ -225,4 +231,111 @@ class HomeController extends ActiveController
         echo JSON::encode($result);
     }
 
+    // update profile using id and update device location
+
+    public function actionEditProfile(){
+        $result = [];
+        $headers = Yii::$app->request->headers;
+        $id = $headers['id'];
+        if(!empty($id)){
+            $user = UserInfo::findOne(["user_id" => $id]);
+            $request = JSON::decode(Yii::$app->request->getRawBody());
+            if(!empty($request)){
+                $user->attributes = $request;
+                $user->modified_date = date('Y-m-d H:i:s');
+                if($user->save()){
+                    $device = DeviceLocation::findOne(["user_id" => $id]);
+                    if(empty($device)){
+                        $device = new DeviceLocation();
+                        $device->attributes = $request;
+                        $device->user_id = $user->user_id;
+                        $device->created_date = date('Y-m-d H:i:s');
+                        $device->modified_date = date('Y-m-d H:i:s');
+                        if($device->save()) {
+                            $result = [
+                                "code" => 200,
+                                "message" => "success",
+                            ];
+                        }else{
+                            $result = [
+                                "code" => 500,
+                                "message" => [$device->errors],
+                            ];
+                        }
+                    }else{
+                        $device->latitude = $request['latitude'];
+                        $device->longitude = $request['longitude'];
+                        $device->created_date = date('Y-m-d H:i:s');
+                        $device->modified_date = date('Y-m-d H:i:s');
+                        if($device->save()) {
+                            $result = [
+                                "code" => 200,
+                                "message" => "success",
+                            ];
+                        }else{
+                            $result = [
+                                "code" => 500,
+                                "message" => [$device->errors],
+                            ];
+                        }
+                    }
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => [$user->errors],
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "data cannot be blank",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "cant get id of user",
+            ];
+        }
+        echo JSON::encode($result);
+    }
+
+    // update profile image
+
+    public function actionUpdateProfileImage()
+    {
+        $result = [];
+        $headers = Yii::$app->request->headers;
+        $id = $headers['id'];
+
+        if(!empty($id)){
+            $model = UserInfo::findOne(["user_id" => $id]);
+//            $request = JSON::decode(Yii::$app->request->getRawBody());
+            $image = UploadedFile::getInstancesByName('image');
+            $path = Yii::getAlias('@webroot').'/uploads/'.$image[0];
+            $savedfiles = [];
+            foreach ($image as $file){
+                $path = Yii::getAlias('@webroot').'/uploads/'.$file->name; //Generate your save file path here;
+                $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
+                $model->image = $file->name;
+                if($model->save()){
+                    $result = [
+                        "code" => 200,
+                        "message" => "success",
+                    ];
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => [$model->errors],
+                    ];
+                }
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "cant get id of user",
+            ];
+        }
+        echo JSON::encode($result);
+    }
 }

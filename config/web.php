@@ -60,6 +60,13 @@ $config = [
                 'register-step2' => '/home/register-step2',
                 'getSplash' => 'home/splash',
                 'social-login' => 'home/social-login',
+                'edit-profile' => 'home/edit-profile',
+                'update-profile-image' => 'home/update-profile-image',
+                'create-group' => 'group/create-group',
+                'group-list' => 'group/group-list',
+                'group-detail' => 'group/group-detail',
+                'add-member-group' => 'group/add-member-group',
+                'leave-member-group' => 'group/leave-member-group'
                 ],
         ],
 

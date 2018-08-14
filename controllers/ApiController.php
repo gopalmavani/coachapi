@@ -47,56 +47,6 @@ class ApiController extends ActiveController
 
     }
 
-//    public function actionRegister()
-//    {
-////        echo "<pre>";
-////        print_r($_POST);die;
-//        $request = JSON::decode( Yii::$app->request->getRawBody());
-////        print_r($request);die;
-//        $model = new Users();
-//        $model->name = $request['name'];
-//        $model->email = $request['email'];
-//        $model->address = $request['address'];
-//        $model->password = $request['password'];
-//        $model->city = $request['city'];
-//        if ($model->save()) {
-//            echo "hi";
-//        }
-//
-//        echo JSON::encode($model);
-//
-//    }
-
-    //Registration Api As per Required Parameters.
-
-    public function actionRegister()
-    {
-        $result = [];
-        $request = JSON::decode(Yii::$app->request->getRawBody());
-        $model = new UserInfo();
-        $model->attributes = $request;
-        $model->password = md5($request['password']);
-        $model->date_of_registration = date('Y-m-d H:i:s');
-        $model->created_date = date('Y-m-d H:i:s');
-        $model->modified_date = date('Y-m-d H:i:s');
-//        MD5 hash for admin@123 is : e6e061838856bf47e1de730719fb2609
-        $model->user_token = md5(uniqid($model->user_id, true));
-        if ($model->save()) {
-            $result = [
-                "code" => 200,
-                "message" => "success",
-                "userId" => $model->user_id,
-                "userToken" => "e6e061838856bf47e1de730719fb2609",
-            ];
-        } else {
-            $result = [
-                "code" => 500,
-                "message" => [$model->errors],
-            ];
-        }
-        echo JSON::encode($result);
-    }
-
 
     //Login Api As per Required Parameters.
 
