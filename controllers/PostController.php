@@ -11,6 +11,8 @@ use yii\web\HeaderCollection ;
 use yii\web\Application;
 use app\models\UserInfo;
 use app\models\Posts;
+use app\models\Likes;
+use app\models\Comments;
 use yii\web\UploadedFile;
 
 
@@ -58,6 +60,8 @@ class PostController extends ActiveController
                             $path = Yii::getAlias('@webroot').'/uploads/media/'.$file->name; //Generate your save file path here;
                             $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
                             $media->url = $file->name;
+                            $media->created_date = date('Y-m-d H:i:s');
+                            $media->modified_date = date('Y-m-d H:i:s');
                             $media->save();
                             if($media->save()){
                                 $result = [
@@ -90,6 +94,95 @@ class PostController extends ActiveController
             $result = [
                 "code" => 500,
                 "message" => "failed",
+            ];
+        }
+        echo JSON::encode($result);
+    }
+
+    //like post
+
+    public function actionLikePost()
+    {
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $request = JSON::decode(Yii::$app->request->getRawBody());
+            $post_id = $request['post_id'];
+            $likeuser = Likes::find()->where(['user_id'=>$user_id])->one();
+            if(empty($likeuser)){
+                $model = new Likes();
+                $model->attributes = $request;
+                $model->user_id = $user_id;
+                $model->created_date = date('Y-m-d H:i:s');
+                $model->modified_date = date('Y-m-d H:i:s');
+                if($model->save()){
+                    $Posts = Posts::find()->where(['post_id'=>$post_id])->one();
+                    if(empty($Posts->likes_count)){ $likes = 0; }else{$likes = $Posts->likes_count;}
+                    $Posts->likes_count = $likes + 1;
+                    if($Posts->save()){
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                        ];
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "error"=> [$Posts->errors],
+                        ];
+                    }
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "already Liked",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "failed",
+            ];
+        }
+        echo JSON::encode($result);
+    }
+
+    //comment post
+
+    public function actionComment()
+    {
+        $result = [];
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        $request = JSON::decode(Yii::$app->request->getRawBody());
+        $post_id = $request['post_id'];
+        if(!empty($user_id) && !empty($post_id)) {
+            $model = new Comments();
+            $model->attributes = $request;
+            $model->user_id = $user_id;
+            $model->created_date = date('Y-m-d H:i:s');
+            $model->modified_date = date('Y-m-d H:i:s');
+            if($model->save()){
+                $result = [
+                    "code" => 200,
+                    "message" => "success",
+                ];
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "failed",
+                    "error"=> [$model->errors],
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "post id and user id not available",
             ];
         }
         echo JSON::encode($result);

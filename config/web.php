@@ -67,9 +67,12 @@ $config = [
                 'getGroupDetail' => 'group/group-detail',
                 'addMemberToGroup' => 'group/add-member-group',
                 'leaveGroup' => 'group/leave-member-group',
-                'createPost' => 'post/create-post',
                 'suggestedFriendList' => 'friend/suggested-friend-list',
                 'addGroup'=>'group/add-group',
+                'createPost' => 'post/create-post',
+                'likePost'=>'post/like-post',
+                'commentPost'=>'post/comment',
+                'deactivateAccount'=>'home/deactive-account'
 
             ],
         ],
