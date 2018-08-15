@@ -5,24 +5,23 @@ namespace app\models;
 use Yii;
 
 /**
- * This is the model class for table "group_mapping".
+ * This is the model class for table "media".
  *
  * @property int $id
- * @property int $group_id
- * @property int $user_id
- * @property int $added_by_user_id
- * @property int $status
+ * @property int $post_id
+ * @property string $url
+ * @property string $type
  * @property string $created_date
  * @property string $modified_date
  */
-class GroupMapping extends \yii\db\ActiveRecord
+class Media extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'group_mapping';
+        return 'media';
     }
 
     /**
@@ -31,9 +30,11 @@ class GroupMapping extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['group_id', 'user_id', 'added_by_user_id', 'created_date', 'modified_date'], 'required'],
-            [['group_id', 'user_id', 'added_by_user_id', 'status'], 'integer'],
+            [['post_id'], 'required'],
+            [['post_id'], 'integer'],
             [['created_date', 'modified_date'], 'safe'],
+            [['url'], 'string', 'max' => 255],
+            [['type'], 'string', 'max' => 50],
         ];
     }
 
@@ -44,10 +45,9 @@ class GroupMapping extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'group_id' => 'Group ID',
-            'user_id' => 'User ID',
-            'added_by_user_id' => 'Added By User ID',
-            'status' => 'Status',
+            'post_id' => 'Post ID',
+            'url' => 'Url',
+            'type' => 'Type',
             'created_date' => 'Created Date',
             'modified_date' => 'Modified Date',
         ];

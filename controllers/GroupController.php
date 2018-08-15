@@ -40,6 +40,8 @@ class GroupController extends ActiveController
     {
         $result = [];
         $data = $_POST;
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
         $model = new GroupInfo();
         $model->attributes = Yii::$app->request->post();
         $image = UploadedFile::getInstancesByName('group_image');
@@ -58,6 +60,7 @@ class GroupController extends ActiveController
                 foreach ($datamember as $user){
                     $GroupMapping = new GroupMapping();
                     $GroupMapping->user_id = $user;
+                    $GroupMapping->added_by_user_id = $user_id;
                     $GroupMapping->group_id = $model->group_id;
                     $GroupMapping->created_date = date('Y-m-d H:i:s');
                     $GroupMapping->modified_date = date('Y-m-d H:i:s');
@@ -76,7 +79,8 @@ class GroupController extends ActiveController
         }else{
             $result = [
                 "code" => 500,
-                "message" => [$model->errors],
+                "message" => "failed",
+                "errors" => [$model->errors],
             ];
         }
     echo JSON::encode($result);
@@ -96,8 +100,8 @@ class GroupController extends ActiveController
             };
             $result = [
                 "code" => 200,
-                "message" => $data,
-
+                "message" => "success",
+                "groupData" => $data,
             ];
         }else{
             $result = [
@@ -140,13 +144,15 @@ class GroupController extends ActiveController
     {
         $headers = Yii::$app->request->headers;
         $user_id = $headers['user_id'];
-        $group_id = $headers['group_id'];
+        $request = JSON::decode(Yii::$app->request->getRawBody());
+        $group_id = $request['group_id'];
         if(!empty($user_id && $group_id)){
             $grouped = GroupMapping::findOne(["user_id"=>$user_id,"group_id"=>$group_id]);
             if(empty($grouped)){
                 $GroupMapping = new GroupMapping();
-                $GroupMapping->user_id = $user_id;
                 $GroupMapping->group_id = $group_id;
+                $GroupMapping->user_id = $user_id;
+                $GroupMapping->added_by_user_id = $user_id;
                 $GroupMapping->created_date = date('Y-m-d H:i:s');
                 $GroupMapping->modified_date = date('Y-m-d H:i:s');
                 if($GroupMapping->save()){
@@ -157,13 +163,14 @@ class GroupController extends ActiveController
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => [$GroupMapping->errors],
+                        "message" => "failed",
+                        "errors" => [$GroupMapping->errors],
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "Already Mapped",
+                    "message" => "Already Added Member",
                 ];
             }
         }else{
@@ -181,7 +188,8 @@ class GroupController extends ActiveController
     {
         $headers = Yii::$app->request->headers;
         $user_id = $headers['user_id'];
-        $group_id = $headers['group_id'];
+        $request = JSON::decode(Yii::$app->request->getRawBody());
+        $group_id = $request['group_id'];
         if(!empty($user_id && $group_id)){
             $grouped = GroupMapping::findOne(["user_id"=>$user_id,"group_id"=>$group_id]);
             if($grouped->delete()){
@@ -192,8 +200,43 @@ class GroupController extends ActiveController
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "Already Mapped",
+                    "message" => "failed",
                 ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "no data",
+            ];
+        }
+        echo JSON::encode($result);
+    }
+
+    //add group by
+
+    public function actionAddGroup()
+    {
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        $request = JSON::decode(Yii::$app->request->getRawBody());
+        $group_id = $request['group_id'];
+        if(!empty($user_id && $group_id && $request['members_id'])){
+            $datamember = explode(",",$request['members_id']);
+            foreach ($datamember as $user){
+                $grouped = GroupMapping::findOne(["user_id"=>$user,"group_id"=>$group_id]);
+                if(empty($grouped)){
+                    $GroupMapping = new GroupMapping();
+                    $GroupMapping->user_id = $user;
+                    $GroupMapping->added_by_user_id = $user_id;
+                    $GroupMapping->group_id = $group_id;
+                    $GroupMapping->created_date = date('Y-m-d H:i:s');
+                    $GroupMapping->modified_date = date('Y-m-d H:i:s');
+                    $GroupMapping->save();
+                    $result = [
+                        "code" => 200,
+                        "message" => "success",
+                    ];
+                }
             }
         }else{
             $result = [
