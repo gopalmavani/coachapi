@@ -73,7 +73,8 @@ class HomeController extends ActiveController
         } else {
             $result = [
                 "code" => 500,
-                "message" => [$model->errors],
+                "message" => "failed",
+                "errors" => [$model->errors],
             ];
         }
         echo JSON::encode($result);
@@ -259,7 +260,8 @@ class HomeController extends ActiveController
                         }else{
                             $result = [
                                 "code" => 500,
-                                "message" => [$device->errors],
+                                "message" => "failed",
+                                "errors" => [$device->errors],
                             ];
                         }
                     }else{
@@ -275,14 +277,16 @@ class HomeController extends ActiveController
                         }else{
                             $result = [
                                 "code" => 500,
-                                "message" => [$device->errors],
+                                "message" => "failed",
+                                "errors" => [$device->errors],
                             ];
                         }
                     }
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => [$user->errors],
+                        "message" => "failed",
+                        "errors" =>[$user->errors],
                     ];
                 }
             }else{
@@ -326,7 +330,8 @@ class HomeController extends ActiveController
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => [$model->errors],
+                        "message" => "failed",
+                        "errors" => [$model->errors],
                     ];
                 }
             }
