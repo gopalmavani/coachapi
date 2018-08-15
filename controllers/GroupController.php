@@ -42,45 +42,52 @@ class GroupController extends ActiveController
         $data = $_POST;
         $headers = Yii::$app->request->headers;
         $user_id = $headers['user_id'];
-        $model = new GroupInfo();
-        $model->attributes = Yii::$app->request->post();
-        $image = UploadedFile::getInstancesByName('group_image');
-        $model->created_date = date('Y-m-d H:i:s');
-        $model->modified_date = date('Y-m-d H:i:s');
-        if(!empty($image)){
-            foreach ($image as $file){
-                $path = Yii::getAlias('@webroot').'/uploads/group/'.$file->name; //Generate your save file path here;
-                $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
-                $model->group_image = $file->name;
-            }
-        }
-        if($model->save()){
-            if(!empty($data['memberList'])){
-                $datamember = explode(",",$data['memberList']);
-                foreach ($datamember as $user){
-                    $GroupMapping = new GroupMapping();
-                    $GroupMapping->user_id = $user;
-                    $GroupMapping->added_by_user_id = $user_id;
-                    $GroupMapping->group_id = $model->group_id;
-                    $GroupMapping->created_date = date('Y-m-d H:i:s');
-                    $GroupMapping->modified_date = date('Y-m-d H:i:s');
-                    $GroupMapping->save();
+        if(!empty($user_id)){
+            $model = new GroupInfo();
+            $model->attributes = Yii::$app->request->post();
+            $image = UploadedFile::getInstancesByName('group_image');
+            $model->created_date = date('Y-m-d H:i:s');
+            $model->modified_date = date('Y-m-d H:i:s');
+            if(!empty($image)){
+                foreach ($image as $file){
+                    $path = Yii::getAlias('@webroot').'/uploads/group/'.$file->name; //Generate your save file path here;
+                    $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
+                    $model->group_image = $file->name;
                 }
-                $result = [
-                    "code" => 200,
-                    "message" => "success",
-                ];
+            }
+            if($model->save()){
+                if(!empty($data['memberList'])){
+                    $datamember = explode(",",$data['memberList']);
+                    foreach ($datamember as $user){
+                        $GroupMapping = new GroupMapping();
+                        $GroupMapping->user_id = $user;
+                        $GroupMapping->added_by_user_id = $user_id;
+                        $GroupMapping->group_id = $model->group_id;
+                        $GroupMapping->created_date = date('Y-m-d H:i:s');
+                        $GroupMapping->modified_date = date('Y-m-d H:i:s');
+                        $GroupMapping->save();
+                    }
+                    $result = [
+                        "code" => 200,
+                        "message" => "success",
+                    ];
+                }else{
+                    $result = [
+                        "code" => 200,
+                        "message" => "success",
+                    ];
+                }
             }else{
                 $result = [
-                    "code" => 200,
-                    "message" => "success",
+                    "code" => 500,
+                    "message" => "failed",
+                    "errors" => [$model->errors],
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
-                "message" => "failed",
-                "errors" => [$model->errors],
+                "message" => "user id not available",
             ];
         }
     echo JSON::encode($result);

@@ -178,17 +178,10 @@ class HomeController extends ActiveController
     {
         $result = [];
         $request = JSON::decode(Yii::$app->request->getRawBody());
-//        if (($request['method'] == "getSplash")) {
-            $result = [
-                "code" => "200",
-                "splash" => "http://localhost/influencer.ae/assets/img/influ.png",
-            ];
-//        } else {
-//            $result = [
-//                "code" => 500,
-//                "message" => "Error Occured,Please try again later",
-//            ];
-//        }
+        $result = [
+            "code" => "200",
+            "splash" => "http://localhost/asd/img/influ.png",
+        ];
         echo JSON::encode($result);
     }
 
@@ -237,62 +230,69 @@ class HomeController extends ActiveController
     public function actionEditProfile(){
         $result = [];
         $headers = Yii::$app->request->headers;
-        $id = $headers['id'];
+        $id = $headers['user_id'];
         if(!empty($id)){
             $user = UserInfo::findOne(["user_id" => $id]);
-            $request = JSON::decode(Yii::$app->request->getRawBody());
-            if(!empty($request)){
-                $user->attributes = $request;
-                $user->modified_date = date('Y-m-d H:i:s');
-                if($user->save()){
-                    $device = DeviceLocation::findOne(["user_id" => $id]);
-                    if(empty($device)){
-                        $device = new DeviceLocation();
-                        $device->attributes = $request;
-                        $device->user_id = $user->user_id;
-                        $device->created_date = date('Y-m-d H:i:s');
-                        $device->modified_date = date('Y-m-d H:i:s');
-                        if($device->save()) {
-                            $result = [
-                                "code" => 200,
-                                "message" => "success",
-                            ];
+            if(!empty($user)){
+                $request = JSON::decode(Yii::$app->request->getRawBody());
+                if(!empty($request)){
+                    $user->attributes = $request;
+                    $user->modified_date = date('Y-m-d H:i:s');
+                    if($user->save()){
+                        $device = DeviceLocation::findOne(["user_id" => $id]);
+                        if(empty($device)){
+                            $device = new DeviceLocation();
+                            $device->attributes = $request;
+                            $device->user_id = $user->user_id;
+                            $device->created_date = date('Y-m-d H:i:s');
+                            $device->modified_date = date('Y-m-d H:i:s');
+                            if($device->save()) {
+                                $result = [
+                                    "code" => 200,
+                                    "message" => "success",
+                                ];
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "failed",
+                                    "errors" => [$device->errors],
+                                ];
+                            }
                         }else{
-                            $result = [
-                                "code" => 500,
-                                "message" => "failed",
-                                "errors" => [$device->errors],
-                            ];
+                            $device->latitude = $request['latitude'];
+                            $device->longitude = $request['longitude'];
+                            $device->created_date = date('Y-m-d H:i:s');
+                            $device->modified_date = date('Y-m-d H:i:s');
+                            if($device->save()) {
+                                $result = [
+                                    "code" => 200,
+                                    "message" => "success",
+                                ];
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "failed",
+                                    "errors" => [$device->errors],
+                                ];
+                            }
                         }
                     }else{
-                        $device->latitude = $request['latitude'];
-                        $device->longitude = $request['longitude'];
-                        $device->created_date = date('Y-m-d H:i:s');
-                        $device->modified_date = date('Y-m-d H:i:s');
-                        if($device->save()) {
-                            $result = [
-                                "code" => 200,
-                                "message" => "success",
-                            ];
-                        }else{
-                            $result = [
-                                "code" => 500,
-                                "message" => "failed",
-                                "errors" => [$device->errors],
-                            ];
-                        }
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "errors" =>[$user->errors],
+                        ];
                     }
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "failed",
-                        "errors" =>[$user->errors],
+                        "message" => "data cannot be blank",
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "data cannot be blank",
+                    "message" => "user not found",
                 ];
             }
         }else{
@@ -310,30 +310,33 @@ class HomeController extends ActiveController
     {
         $result = [];
         $headers = Yii::$app->request->headers;
-        $id = $headers['id'];
-
+        $id = $headers['user_id'];
         if(!empty($id)){
             $model = UserInfo::findOne(["user_id" => $id]);
-//            $request = JSON::decode(Yii::$app->request->getRawBody());
-            $image = UploadedFile::getInstancesByName('image');
-            $path = Yii::getAlias('@webroot').'/uploads/'.$image[0];
-            $savedfiles = [];
-            foreach ($image as $file){
-                $path = Yii::getAlias('@webroot').'/uploads/'.$file->name; //Generate your save file path here;
-                $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
-                $model->image = $file->name;
-                if($model->save()){
-                    $result = [
-                        "code" => 200,
-                        "message" => "success",
-                    ];
-                }else{
-                    $result = [
-                        "code" => 500,
-                        "message" => "failed",
-                        "errors" => [$model->errors],
-                    ];
+            if(!empty($model)){
+                $image = UploadedFile::getInstancesByName('image');
+                foreach ($image as $file){
+                    $path = Yii::getAlias('@webroot').'/uploads/'.$file->name; //Generate your save file path here;
+                    $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
+                    $model->image = $file->name;
+                    if($model->save()){
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                        ];
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "errors" => [$model->errors],
+                        ];
+                    }
                 }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "user not found",
+                ];
             }
         }else{
             $result = [
