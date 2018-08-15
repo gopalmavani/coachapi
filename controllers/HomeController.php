@@ -84,7 +84,7 @@ class HomeController extends ActiveController
     {
         $result = [];
         $request = JSON::decode(Yii::$app->request->getRawBody());
-        if ((!empty($request['loginType'])) && (!empty($request['socialId'])) && ($request['userType'] == "coach/user") && (!empty($request['deviceId'])) && ($request['deviceType'] == "ios/android")) {
+        if ((!empty($request['loginType'])) && (!empty($request['socialId'])) && (!empty($request['userType'])) && (!empty($request['deviceId'])) && ($request['deviceType'] == "ios" || "android")) {
             if (!empty($request['email']) && !empty($request['password'])) {
                 $user = UserInfo::findOne(["email" => $request['email'], "password" => md5($request['password'])]);
                 if (!empty($user)) {
@@ -130,8 +130,8 @@ class HomeController extends ActiveController
     {
         $result = [];
         $request = JSON::decode(Yii::$app->request->getRawBody());
-        if (($request['method'] == "login") && ($request['loginType'] == "facebook/google/insta/linkedin") && ($request['deviceId'] == "ezjdhhh455hh5jh565") && ($request['deviceType'] == "ios/android")) {
-            if (!empty($request['email']) && ($request['socialId'] == "3e44r45r4")) {
+        if (($request['method'] == "login") && ($request['loginType'] == "facebook" || "google" || "insta" || "linkedin") && ($request['deviceId'] == "ezjdhhh455hh5jh565") && ($request['deviceType'] == "ios" || "android")) {
+            if (!empty($request['email']) && (!empty($request['socialId']))) {
                 $user = UserInfo::findOne(["email" => $request['email']]);
                 if (!empty($user)) {
                     if($user->gender == 1){
