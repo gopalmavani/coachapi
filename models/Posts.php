@@ -15,7 +15,7 @@ use Yii;
  * @property string $post_author
  * @property int $post_status
  * @property string $post_type
- * @property string $likes_count
+ * @property int $likes_count
  * @property string $comment_count
  * @property string $created_date
  * @property string $modified_date
@@ -37,10 +37,10 @@ class Posts extends \yii\db\ActiveRecord
     {
         return [
             [['user_id', 'post_type', 'created_date', 'modified_date'], 'required'],
-            [['user_id', 'post_status'], 'integer'],
+            [['user_id', 'post_status', 'likes_count'], 'integer'],
             [['created_date', 'modified_date'], 'safe'],
             [['post_title', 'post_subtitle', 'post_description', 'post_author'], 'string', 'max' => 50],
-            [['post_type', 'likes_count', 'comment_count'], 'string', 'max' => 20],
+            [['post_type', 'comment_count'], 'string', 'max' => 20],
         ];
     }
 

@@ -353,4 +353,50 @@ class HomeController extends ActiveController
         }
         echo JSON::encode($result);
     }
+
+    //deactive account
+
+    public function actionDeactiveAccount()
+    {
+        $result = [];
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $model = UserInfo::findOne(["user_id" => $user_id]);
+            if(!empty($model)){
+                if($model->is_active == 0 ){
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                        "errors" => "already deactive account",
+                    ];
+                }else{
+                    $model->is_active = 0;
+                    if($model->save()){
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                        ];
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "errors" => [$model->errors],
+                        ];
+                    }
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "user not found",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "cant get id of user",
+            ];
+        }
+        echo JSON::encode($result);
+    }
 }
