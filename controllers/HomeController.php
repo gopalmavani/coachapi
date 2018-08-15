@@ -315,22 +315,29 @@ class HomeController extends ActiveController
             $model = UserInfo::findOne(["user_id" => $id]);
             if(!empty($model)){
                 $image = UploadedFile::getInstancesByName('image');
-                foreach ($image as $file){
-                    $path = Yii::getAlias('@webroot').'/uploads/'.$file->name; //Generate your save file path here;
-                    $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
-                    $model->image = $file->name;
-                    if($model->save()){
-                        $result = [
-                            "code" => 200,
-                            "message" => "success",
-                        ];
-                    }else{
-                        $result = [
-                            "code" => 500,
-                            "message" => "failed",
-                            "errors" => [$model->errors],
-                        ];
+                if(!empty($image)){
+                    foreach ($image as $file){
+                        $path = Yii::getAlias('@webroot').'/uploads/'.$file->name; //Generate your save file path here;
+                        $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
+                        $model->image = $file->name;
+                        if($model->save()){
+                            $result = [
+                                "code" => 200,
+                                "message" => "success",
+                            ];
+                        }else{
+                            $result = [
+                                "code" => 500,
+                                "message" => "failed",
+                                "errors" => [$model->errors],
+                            ];
+                        }
                     }
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "image not available",
+                    ];
                 }
             }else{
                 $result = [
