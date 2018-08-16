@@ -109,6 +109,18 @@ class UsersController extends Controller
         return $this->redirect(['index']);
     }
 
+    public function actionResetpassword($id)
+    {
+        $this->layout = 'forget_password';
+        if(isset($_POST['password'])){
+            echo "hi";die;
+        }
+        return $this->render('resetpassword', [
+
+        ]);
+    }
+
+
     /**
      * Finds the Users model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

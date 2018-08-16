@@ -47,55 +47,6 @@ class ApiController extends ActiveController
 
     }
 
-
-    //Login Api As per Required Parameters.
-
-    public function actionLogin()
-    {
-        $result = [];
-        $request = JSON::decode(Yii::$app->request->getRawBody());
-        if ((!empty($request['loginType'])) && (!empty($request['socialId'])) && ($request['userType'] == "coach/user") && (!empty($request['deviceId'])) && ($request['deviceType'] == "ios/android")) {
-            if (!empty($request['email']) && !empty($request['password'])) {
-                $user = UserInfo::findOne(["email" => $request['email'], "password" => md5($request['password'])]);
-                if (!empty($user)) {
-                    if($user->gender == 1){
-                        $user->gender = "Female";
-                    }else{
-                        $user->gender = "male";
-                    }
-                    if($user->is_enabled == 1){
-                        $user->is_enabled = "yes";
-                    }else{
-                        $user->is_enabled = "no";
-                    }
-
-                    $result = [
-                        "code" => 200,
-                        "status" => "success",
-                        "userDetails" => $user,
-                    ];
-                } else {
-                    $result = [
-                        "code" => 500,
-                        "message" => "Invalid user/Password",
-                    ];
-                }
-            } else {
-                $result = [
-                    "code" => 500,
-                    "message" => "email and password required",
-                ];
-            }
-        } else {
-            $result = [
-                "code" => 500,
-                "message" => "Invalid user/Password",
-            ];
-        }
-        echo JSON::encode($result);
-    }
-
-
     //Social Login Api As per Required Parameters.
 
     public function actionSocialLogin()
@@ -133,50 +84,4 @@ class ApiController extends ActiveController
         echo JSON::encode($result);
     }
 
-    //get splash Api As per Required Parameters.
-
-    public function actionSplash()
-    {
-        $result = [];
-        $request = JSON::decode(Yii::$app->request->getRawBody());
-        if (($request['method'] == "getSplash")) {
-            $result = [
-                "code" => "200",
-                "splash" => "http://www/xyz.com/abc.png",
-            ];
-        } else {
-            $result = [
-                "code" => 500,
-                "message" => "Error Occured,Please try again later",
-            ];
-        }
-        echo JSON::encode($result);
-    }
-
-    public function actionRegisterLocation()
-    {
-        $result = [];
-        $request = JSON::decode(Yii::$app->request->getRawBody());
-        $model = new DeviceLocation();
-        $model->attributes = $request;
-        $model->created_date = date('Y-m-d H:i:s');
-        $model->modified_date = date('Y-m-d H:i:s');
-        if ($model->save()) {
-            $result = [
-                "code" => 200,
-                "message" => "success",
-            ];
-        } else {
-            $result = [
-                "code" => 500,
-                "message" => [$model->errors],
-            ];
-        }
-        echo JSON::encode($result);
-    }
-
-    public function actionSuggestedFriendList()
-    {
-        echo "hi";die;
-    }
 }
