@@ -399,4 +399,116 @@ class HomeController extends ActiveController
         }
         echo JSON::encode($result);
     }
+
+    //update Location
+
+    public function actionRegisterLocation()
+    {
+        $result = [];
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $request = JSON::decode(Yii::$app->request->getRawBody());
+            if(isset($request['latitude']) && isset($request['longitude'])){
+                $model = DeviceLocation::findOne(["user_id" => $user_id]);
+                if(!empty($model)){
+                    $model->attributes = $request;
+                    $model->user_id = $user_id;
+                    $model->created_date = date('Y-m-d H:i:s');
+                    $model->modified_date = date('Y-m-d H:i:s');
+                    if ($model->save()) {
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                        ];
+                    } else {
+                        $result = [
+                            "code" => 500,
+                            "message" => [$model->errors],
+                        ];
+                    }
+                }else{
+                    $device = new DeviceLocation();
+                    $device->attributes = $request;
+                    $device->user_id = $user_id;
+                    $device->created_date = date('Y-m-d H:i:s');
+                    $device->modified_date = date('Y-m-d H:i:s');
+                    if ($device->save()) {
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                        ];
+                    } else {
+                        $result = [
+                            "code" => 500,
+                            "message" => [$device->errors],
+                        ];
+                    }
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "failed",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "cant get id of user",
+            ];
+        }
+
+        echo JSON::encode($result);
+    }
+
+    //forget password for the reser password
+
+    public function actionForgetPassword()
+    {
+        $result = [];
+        $request = JSON::decode(Yii::$app->request->getRawBody());
+        if (!empty($request['email'])) {
+            $user = UserInfo::findOne(["email" => $request['email']]);
+            if (!empty($user)) {
+                $to = $user['email'];
+                $subject = "user password reset";
+                $headers = "MIME-Version: 1.0" . "\r\n";
+                $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+                $headers .= "From: support@coach.in" . "\r\n" .
+                $url = Yii::$app->urlManager->createUrl("users/reset-password");
+                    $message = "<html>
+                            <body>
+                                <table style='border:5px solid #f1f1f1;margin:50px auto;width:500px;'>
+                                    <tbody>
+                                        <tr width='100%'> 
+                                           password reset link <a href='<?php echo ?>'>click here</a>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </body>
+                        </html>";
+                if(mail($to, $subject, $message, $headers)){
+                    $result = [
+                        "code" => 200,
+                        "message" => "success",
+                    ];
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "user not found",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "user id not available",
+            ];
+        }
+    }
 }

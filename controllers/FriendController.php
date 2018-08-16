@@ -10,6 +10,7 @@ use yii\web\HeaderCollection ;
 use yii\web\Application;
 use app\models\GroupInfo;
 use app\models\UserInfo;
+use app\models\FriendsList;
 use app\models\GroupMapping;
 use app\models\DeviceLocation;
 use yii\web\UploadedFile;
@@ -36,6 +37,7 @@ class FriendController extends ActiveController
         }
     }
 
+    //Suggested friend list display
 
     public function actionSuggestedFriendList()
     {
@@ -51,6 +53,110 @@ class FriendController extends ActiveController
             $result = [
                 "code" => 500,
                 "message" => "failed",
+            ];
+        }
+        echo JSON::encode($result);
+    }
+
+    //add friend Request
+
+    public function actionAddFriendRequest()
+    {
+        $result = [];
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $request = JSON::decode(Yii::$app->request->getRawBody());
+            $request_id = $request['requested_by'];
+            if(!empty($request_id)){
+                $friend = FriendsList::findOne(["requested_by"=>$request_id,"user_id"=>$user_id]);
+                $user = UserInfo::findOne(["user_id"=>$request_id]);
+                if(!empty($user)){
+                    if(empty($friend)){
+                        $model = new FriendsList();
+                        $model->requested_by = $request_id;
+                        $model->user_id = $user_id;
+                        if($model->save()){
+                            $result = [
+                                "code" => 200,
+                                "status" => "success",
+                            ];
+                        }else{
+                            $result = [
+                                "code" => 500,
+                                "message" => "failed",
+                                "error"=> $model->errors,
+                            ];
+                        }
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "request alreaady sent",
+                        ];
+                    }
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "requested user is not found",
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "request id not found",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "user id not available",
+            ];
+        }
+        echo JSON::encode($result);
+    }
+
+    //accept friend Request
+
+    public function actionAcceptFriendRequest()
+    {
+        $result = [];
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $request = JSON::decode(Yii::$app->request->getRawBody());
+            if(isset($request['friend_list_id'])){
+                $response_id = $request['friend_list_id'];
+                $friend = FriendsList::findOne(["friend_list_id"=>$response_id,"requested_by"=>$user_id]);
+                if(!empty($friend)){
+                    $friend->status = 1;
+                    if($friend->save()){
+                        $result = [
+                            "code" => 200,
+                            "status" => "success",
+                        ];
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "error"=>$friend->errors,
+                        ];
+                    }
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "request not found",
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "response id not available",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "user id not available",
             ];
         }
         echo JSON::encode($result);

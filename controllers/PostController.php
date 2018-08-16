@@ -187,4 +187,129 @@ class PostController extends ActiveController
         }
         echo JSON::encode($result);
     }
+
+    //post list display
+
+    public function actionList()
+    {
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $model = UserInfo::findOne(["user_id" => $user_id]);
+            if(!empty($model)){
+                $postListArray = [];
+                $post_list = Posts::find()->select(["user_id","post_id","created_date","post_type","likes_count"])->where(["user_id" => $user_id])->all();
+                foreach ($post_list as $posts){
+                    //for post conetnt
+                    $postcontent= [];
+                    $postcont = Media::find()->select(["url"])->where(["post_id" => $posts['post_id']])->all();
+                    foreach ($postcont as $postImageUrl){
+//                        print_r($postImageUrl);die;
+                        array_push($postcontent,array(
+                            "postType"=>$posts['post_type'],
+                            "post"=>$postImageUrl['url'],
+                            ));
+                    }
+                    //for comments content
+                    $comments =[];
+                    $commentsCont = Comments::find()->where(["post_id" => $posts['post_id'],"user_id"=>$user_id])->all();
+                    foreach ($commentsCont as $commnt){
+                        array_push($comments,array(
+                            "comment_id"=>$commnt['id'],
+                            "comments"=>$commnt['comment_text'],
+                            "user_id"=>$user_id,
+                            "user_image"=>$model->image,
+                        ));
+                    }
+                    //for time and date different
+                    if(!empty($posts['created_date'])){
+                        $timestamp = strtotime($posts['created_date']);
+                        $date = date('m/d/Y', $timestamp);
+                        $time =  date('h:i:s', $timestamp);
+                    }else{
+                        $date = "";
+                        $time =  "";
+                    }
+                    if(empty($postcontent)){
+                        $postcontent ="";
+                    }if(empty($comments)){
+                        $comments ="";
+                    }
+                    array_push($postListArray,array(
+                        "post_id"=>$posts['post_id'],
+                        "user_id"=>$user_id,
+                        "username"=>$model->first_name.' '.$model->last_name,
+                        "user_image"=>$model->image,
+                        "date"=>$date,
+                        "time"=>$time,
+                        "postContent"=>$postcontent,
+                        "likes"=>$posts['likes_count'],
+                        "postComments"=>$comments,
+                    ));
+                }
+                $result = [
+                    "code" => 200,
+                    "message" => "success",
+                    "postList"=>$postListArray
+                ];
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "user not found",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "user id not available",
+            ];
+        }
+        echo JSON::encode($result);
+    }
+
+    //like list of post id
+
+    public function actionLikeList()
+    {
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $model = UserInfo::findOne(["user_id" => $user_id]);
+            if(!empty($model)){
+                $request = JSON::decode(Yii::$app->request->getRawBody());
+                $post_id = $request['post_id'];
+                $likeuser = Likes::find()->where(['post_id'=>$post_id])->all();
+                if(!empty($likeuser)){
+                    $likesList = [];
+                    foreach ($likeuser as $likes){
+                        $model = UserInfo::findOne(["user_id" => $likes['user_id']]);
+                        array_push($likesList,array("userName"=>$model['first_name'].' '.$model['last_name'],"imageUrl"=>$model['image'],"about"=>$model['about_user']));
+                    }
+//                    echo "<pre>";
+//                    print_r($likesList);die;
+                    $result = [
+                        "code" => 200,
+                        "message" => "success",
+                        "list"=>$likesList,
+                    ];
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "likes not yet",
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "user not found",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "user id not available",
+            ];
+        }
+        echo JSON::encode($result);
+    }
 }
