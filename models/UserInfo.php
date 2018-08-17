@@ -13,8 +13,14 @@ use Yii;
  * @property string $email
  * @property string $password
  * @property string $dob
- * @property string $role
+ * @property string $user_type
  * @property int $gender
+ * @property string $house_number
+ * @property string $region
+ * @property string $city
+ * @property string $country
+ * @property string $pincode
+ * @property string $phone
  * @property string $about_user
  * @property string $goals
  * @property string $focus_areas
@@ -26,6 +32,9 @@ use Yii;
  * @property string $date_of_registration
  * @property string $created_date
  * @property string $modified_date
+ * @property string $user_token
+ * @property string $social_id
+ * @property string $image
  */
 class UserInfo extends \yii\db\ActiveRecord
 {
@@ -43,12 +52,14 @@ class UserInfo extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['first_name', 'email', 'password', 'role'], 'required'],
+            [['first_name', 'email', 'password', 'user_type'], 'required'],
             [['dob', 'last_logged_in', 'date_of_registration', 'created_date', 'modified_date'], 'safe'],
             [['gender', 'is_active', 'is_enabled'], 'integer'],
-            [['first_name', 'last_name', 'goals','password'], 'string', 'max' => 50],
-            [['email', 'about_user', 'focus_areas', 'location', 'profession'], 'string', 'max' => 100],
-            [['role'], 'string', 'max' => 20],
+            [['first_name', 'last_name', 'password', 'region', 'city', 'country', 'goals', 'user_token', 'social_id'], 'string', 'max' => 50],
+            [['email', 'about_user', 'focus_areas', 'location', 'profession', 'image'], 'string', 'max' => 100],
+            [['user_type', 'house_number'], 'string', 'max' => 20],
+            [['pincode'], 'string', 'max' => 10],
+            [['phone'], 'string', 'max' => 12],
             [['email'], 'unique'],
         ];
     }
@@ -65,8 +76,14 @@ class UserInfo extends \yii\db\ActiveRecord
             'email' => 'Email',
             'password' => 'Password',
             'dob' => 'Dob',
-            'role' => 'Role',
+            'user_type' => 'User Type',
             'gender' => 'Gender',
+            'house_number' => 'House Number',
+            'region' => 'Region',
+            'city' => 'City',
+            'country' => 'Country',
+            'pincode' => 'Pincode',
+            'phone' => 'Phone',
             'about_user' => 'About User',
             'goals' => 'Goals',
             'focus_areas' => 'Focus Areas',
@@ -78,6 +95,9 @@ class UserInfo extends \yii\db\ActiveRecord
             'date_of_registration' => 'Date Of Registration',
             'created_date' => 'Created Date',
             'modified_date' => 'Modified Date',
+            'user_token' => 'User Token',
+            'social_id' => 'Social ID',
+            'image' => 'Image',
         ];
     }
 }
