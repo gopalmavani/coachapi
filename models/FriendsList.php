@@ -9,7 +9,7 @@ use Yii;
  *
  * @property int $friend_list_id
  * @property int $user_id
- * @property int $requested_by
+ * @property int $friend_user_id
  * @property int $status
  * @property string $created_date
  * @property string $modified_date
@@ -30,8 +30,8 @@ class FriendsList extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'requested_by'], 'required'],
-            [['user_id', 'requested_by', 'status'], 'integer'],
+            [['user_id', 'friend_user_id'], 'required'],
+            [['user_id', 'friend_user_id', 'status'], 'integer'],
             [['created_date', 'modified_date'], 'safe'],
         ];
     }
@@ -44,7 +44,7 @@ class FriendsList extends \yii\db\ActiveRecord
         return [
             'friend_list_id' => 'Friend List ID',
             'user_id' => 'User ID',
-            'requested_by' => 'Requested By',
+            'friend_user_id' => 'Friend User ID',
             'status' => 'Status',
             'created_date' => 'Created Date',
             'modified_date' => 'Modified Date',

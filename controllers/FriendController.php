@@ -67,14 +67,14 @@ class FriendController extends ActiveController
         $user_id = $headers['user_id'];
         if(!empty($user_id)){
             $request = JSON::decode(Yii::$app->request->getRawBody());
-            $request_id = $request['requested_by'];
+            $request_id = $request['friend_user_id'];
             if(!empty($request_id)){
-                $friend = FriendsList::findOne(["requested_by"=>$request_id,"user_id"=>$user_id]);
+                $friend = FriendsList::findOne(["friend_user_id"=>$request_id,"user_id"=>$user_id]);
                 $user = UserInfo::findOne(["user_id"=>$request_id]);
                 if(!empty($user)){
                     if(empty($friend)){
                         $model = new FriendsList();
-                        $model->requested_by = $request_id;
+                        $model->friend_user_id = $request_id;
                         $model->user_id = $user_id;
                         if($model->save()){
                             $result = [
@@ -126,7 +126,7 @@ class FriendController extends ActiveController
             $request = JSON::decode(Yii::$app->request->getRawBody());
             if(isset($request['friend_list_id'])){
                 $response_id = $request['friend_list_id'];
-                $friend = FriendsList::findOne(["friend_list_id"=>$response_id,"requested_by"=>$user_id]);
+                $friend = FriendsList::findOne(["friend_list_id"=>$response_id,"friend_user_id"=>$user_id]);
                 if(!empty($friend)){
                     $friend->status = 1;
                     if($friend->save()){

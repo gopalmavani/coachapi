@@ -5,13 +5,12 @@ namespace app\models;
 use Yii;
 
 /**
- * This is the model class for table "comments".
+ * This is the model class for table "post_comments".
  *
  * @property int $id
  * @property int $post_id
  * @property int $user_id
  * @property string $comment_text
- * @property string $comment_author
  * @property int $comment_status
  * @property string $comment_type
  * @property string $created_date
@@ -24,7 +23,7 @@ class Comments extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'comments';
+        return 'post_comments';
     }
 
     /**
@@ -37,7 +36,7 @@ class Comments extends \yii\db\ActiveRecord
             [['post_id', 'user_id', 'comment_status'], 'integer'],
             [['created_date', 'modified_date'], 'safe'],
             [['comment_text'], 'string', 'max' => 255],
-            [['comment_author', 'comment_type'], 'string', 'max' => 50],
+            [['comment_type'], 'string', 'max' => 50],
         ];
     }
 
@@ -51,7 +50,6 @@ class Comments extends \yii\db\ActiveRecord
             'post_id' => 'Post ID',
             'user_id' => 'User ID',
             'comment_text' => 'Comment Text',
-            'comment_author' => 'Comment Author',
             'comment_status' => 'Comment Status',
             'comment_type' => 'Comment Type',
             'created_date' => 'Created Date',
