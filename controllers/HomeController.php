@@ -325,8 +325,9 @@ class HomeController extends ActiveController
                             }
                         }else{
                             $device->event = "register";
-                            $device->latitude = $request['latitude'];
-                            $device->longitude = $request['longitude'];
+                            $device->attributes = $request;
+//                            $device->latitude = $request['latitude'];
+//                            $device->longitude = $request['longitude'];
                             $device->created_date = date('Y-m-d H:i:s');
                             $device->modified_date = date('Y-m-d H:i:s');
                             if($device->save()) {
@@ -491,7 +492,8 @@ class HomeController extends ActiveController
                     } else {
                         $result = [
                             "code" => 500,
-                            "message" => [$model->errors],
+                            "message" => "failed",
+                            "error" => [$model->errors],
                         ];
                     }
                 }else{
@@ -509,7 +511,8 @@ class HomeController extends ActiveController
                     } else {
                         $result = [
                             "code" => 500,
-                            "message" => [$device->errors],
+                            "message" => "failed",
+                            "error" => [$device->errors],
                         ];
                     }
                 }
