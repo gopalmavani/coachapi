@@ -85,7 +85,7 @@ class HomeController extends ActiveController
     {
         $result = [];
         $request = JSON::decode(Yii::$app->request->getRawBody());
-        if ((!empty($request['loginType'])) && (!empty($request['socialId'])) && (!empty($request['userType'])) && (!empty($request['deviceId'])) && ($request['deviceType'] == "ios" || "android")) {
+        if ((!empty($request['userType'])) && (!empty($request['deviceId'])) && ($request['deviceType'] == "ios" || "android")) {
             if (!empty($request['email']) && !empty($request['password'])) {
                 $user = UserInfo::findOne(["email" => $request['email'], "password" => md5($request['password'])]);
                 if (!empty($user)) {
@@ -99,10 +99,27 @@ class HomeController extends ActiveController
                     }else{
                         $user->is_enabled = "no";
                     }
+                    $userDetails = [
+                        "userId"=>$user['user_id'],
+                        "userType"=>$user['user_type'],
+                        "fullname"=>$user['first_name'].' '.$user['last_name'],
+                        "email"=>$user['email'],
+                        "gender"=> $user->gender,
+                        "dob"=>$user->dob,
+                        "aboutme"=>$user->about_user,
+                        "goals"=>$user->goals,
+                        "focus_area"=>$user->focus_areas,
+                        "city"=>$user->city,
+                        "country"=>$user->country,
+                        "profession"=>$user->profession,
+                        "is_verified"=> $user->is_enabled
+                    ];
+
                     $result = [
                         "code" => 200,
                         "status" => "success",
-                        "userDetails" => $user,
+                        "userToken"=>$user->user_token,
+                        "userDetails" => $userDetails,
                     ];
                 } else {
                     $result = [
