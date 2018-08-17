@@ -6,17 +6,21 @@
  * Time: 5:14 PM
  */
 ?>
+<style>
+    .row{
+        margin-left: unset;
+        margin-right: unset;
+    }
+    .restpass{
+        margin-top: 200px;
+        margin-left: 40px;
+        margin-right: 40px;
+    }
+</style>
 <div class="center">
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
     <div class="row">
-
         <div class="col-lg-4"></div>
-        <div class="col-lg-4">
+        <div class="col-lg-4 restpass">
         <h3 style="margin-left: -15px;">Reset Password</h3><br>
             <form action="" method="post">
             <div class="row">
