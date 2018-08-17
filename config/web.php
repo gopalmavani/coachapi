@@ -74,6 +74,7 @@ $config = [
                 'addGroup'=>'group/add-group',
                 'createPost' => 'post/create-post',
                 'likePost'=>'post/like-post',
+                'likeGroup'=>'post/like-group',
                 'commentPost'=>'post/comment',
                 'postList'=>'post/list',
                 'likeList'=>'post/like-list',

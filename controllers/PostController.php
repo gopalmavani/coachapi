@@ -1,5 +1,7 @@
 <?php
 namespace app\controllers;
+use app\models\GroupInfo;
+use app\models\GroupLikes;
 use app\models\Media;
 use Yii;
 use yii\web\Controller;
@@ -108,7 +110,7 @@ class PostController extends ActiveController
         if(!empty($user_id)){
             $request = JSON::decode(Yii::$app->request->getRawBody());
             $post_id = $request['post_id'];
-            $likeuser = Likes::find()->where(['user_id'=>$user_id])->one();
+            $likeuser = Likes::find()->where(['user_id'=>$user_id,"post_id"=>$post_id])->one();
             if(empty($likeuser)){
                 $model = new Likes();
                 $model->attributes = $request;
@@ -152,6 +154,59 @@ class PostController extends ActiveController
         echo JSON::encode($result);
     }
 
+    //like group
+
+    public function actionLikeGroup()
+    {
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $request = JSON::decode(Yii::$app->request->getRawBody());
+            $group_id = $request['group_id'];
+            $likeuser = GroupLikes::find()->where(['user_id'=>$user_id,"group_id"=>$group_id])->one();
+            if(empty($likeuser)){
+                $model = new GroupLikes();
+                $model->attributes = $request;
+                $model->user_id = $user_id;
+                $model->created_date = date('Y-m-d H:i:s');
+                $model->modified_date = date('Y-m-d H:i:s');
+                if($model->save()){
+                    $group = GroupInfo::find()->where(['group_id'=>$group_id])->one();
+                    if(empty($group->likes_count)){ $likes = 0; }else{$likes = $group->likes_count;}
+                    $group->likes_count = $likes + 1;
+                    if($group->save()){
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                        ];
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "error"=> [$group->errors],
+                        ];
+                    }
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "already Liked",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "failed",
+            ];
+        }
+        echo JSON::encode($result);
+    }
+
     //comment post
 
     public function actionComment()
@@ -162,27 +217,35 @@ class PostController extends ActiveController
         $request = JSON::decode(Yii::$app->request->getRawBody());
         $post_id = $request['post_id'];
         if(!empty($user_id) && !empty($post_id)) {
-            $model = new Comments();
-            $model->attributes = $request;
-            $model->user_id = $user_id;
-            $model->created_date = date('Y-m-d H:i:s');
-            $model->modified_date = date('Y-m-d H:i:s');
-            if($model->save()){
-                $result = [
-                    "code" => 200,
-                    "message" => "success",
-                ];
+            $post = Posts::findOne(["post_id" => $post_id]);
+            if(!empty($post)){
+                $model = new Comments();
+                $model->attributes = $request;
+                $model->user_id = $user_id;
+                $model->created_date = date('Y-m-d H:i:s');
+                $model->modified_date = date('Y-m-d H:i:s');
+                if($model->save()){
+                    $result = [
+                        "code" => 200,
+                        "message" => "success",
+                    ];
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                        "error"=> [$model->errors],
+                    ];
+                }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "failed",
-                    "error"=> [$model->errors],
+                    "message" => "post id not available",
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
-                "message" => "post id and user id not available",
+                "message" => "post id or user id not available",
             ];
         }
         echo JSON::encode($result);
@@ -208,17 +271,17 @@ class PostController extends ActiveController
                         array_push($postcontent,array(
                             "postType"=>$posts['post_type'],
                             "post"=>$postImageUrl['url'],
-                            ));
+                        ));
                     }
                     //for comments content
                     $comments =[];
                     $commentsCont = Comments::find()->where(["post_id" => $posts['post_id'],"user_id"=>$user_id])->all();
                     foreach ($commentsCont as $commnt){
                         array_push($comments,array(
-                            "comment_id"=>$commnt['id'],
-                            "comments"=>$commnt['comment_text'],
-                            "user_id"=>$user_id,
-                            "user_image"=>$model->image,
+                            "comment_id" => $commnt['id'],
+                            "comments" => $commnt['comment_text'],
+                            "user_id" => $user_id,
+                            "user_image" => $model->image,
                         ));
                     }
                     //for time and date different
@@ -230,23 +293,20 @@ class PostController extends ActiveController
                         $date = "";
                         $time =  "";
                     }
-                    if(empty($postcontent)){
-                        $postcontent ="";
-                    }if(empty($comments)){
-                        $comments ="";
-                    }
+
                     array_push($postListArray,array(
-                        "post_id"=>$posts['post_id'],
-                        "user_id"=>$user_id,
-                        "username"=>$model->first_name.' '.$model->last_name,
-                        "user_image"=>$model->image,
-                        "date"=>$date,
-                        "time"=>$time,
-                        "postContent"=>$postcontent,
-                        "likes"=>$posts['likes_count'],
-                        "postComments"=>$comments,
+                        "post_id" => $posts['post_id'],
+                        "user_id" => $user_id,
+                        "username" => $model->first_name,
+                        "user_image" =>$model->image,
+                        "date" => $date,
+                        "time" => $time,
+                        "postContent" => $postcontent,
+                        "likes" => $posts['likes_count'],
+                        "postComments" => $comments,
                     ));
                 }
+
                 $result = [
                     "code" => 200,
                     "message" => "success",
@@ -264,6 +324,7 @@ class PostController extends ActiveController
                 "message" => "user id not available",
             ];
         }
+
         echo JSON::encode($result);
     }
 
@@ -283,7 +344,11 @@ class PostController extends ActiveController
                     $likesList = [];
                     foreach ($likeuser as $likes){
                         $model = UserInfo::findOne(["user_id" => $likes['user_id']]);
-                        array_push($likesList,array("userName"=>$model['first_name'].' '.$model['last_name'],"imageUrl"=>$model['image'],"about"=>$model['about_user']));
+                        array_push($likesList,array(
+                            "userName"=>$model['first_name'].' '.$model['last_name'],
+                            "imageUrl"=>$model['image'],
+                            "about"=>$model['about_user']
+                        ));
                     }
 //                    echo "<pre>";
 //                    print_r($likesList);die;
@@ -295,7 +360,7 @@ class PostController extends ActiveController
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "likes not yet",
+                        "message" => "no data available",
                     ];
                 }
             }else{

@@ -5,22 +5,22 @@ namespace app\models;
 use Yii;
 
 /**
- * This is the model class for table "post_likes".
+ * This is the model class for table "group_likes".
  *
  * @property int $id
- * @property int $post_id
  * @property int $user_id
+ * @property int $group_id
  * @property string $created_date
  * @property string $modified_date
  */
-class Likes extends \yii\db\ActiveRecord
+class GroupLikes extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'post_likes';
+        return 'group_likes';
     }
 
     /**
@@ -29,8 +29,8 @@ class Likes extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['post_id', 'user_id'], 'required'],
-            [['post_id', 'user_id'], 'integer'],
+            [['user_id', 'group_id'], 'required'],
+            [['user_id', 'group_id'], 'integer'],
             [['created_date', 'modified_date'], 'safe'],
         ];
     }
@@ -42,8 +42,8 @@ class Likes extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'post_id' => 'Post ID',
             'user_id' => 'User ID',
+            'group_id' => 'Group ID',
             'created_date' => 'Created Date',
             'modified_date' => 'Modified Date',
         ];
