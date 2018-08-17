@@ -63,6 +63,9 @@ class HomeController extends ActiveController
             if ($model->save()) {
                 $device = new DeviceLocation();
                 $device->attributes = $request;
+                if(isset($request['deviceId'])){
+                    $model->device_token = $request['deviceId'];
+                }
                 $device->event = "register";
                 $device->user_id = $model->user_id;
                 $device->created_date = date('Y-m-d H:i:s');
@@ -494,6 +497,7 @@ class HomeController extends ActiveController
                 }else{
                     $device = new DeviceLocation();
                     $device->attributes = $request;
+                    $model->device_token = $request['deviceToken'];
                     $device->user_id = $user_id;
                     $device->created_date = date('Y-m-d H:i:s');
                     $device->modified_date = date('Y-m-d H:i:s');
