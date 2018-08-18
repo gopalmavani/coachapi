@@ -12,7 +12,6 @@ use Yii;
  * @property string $post_title
  * @property string $post_subtitle
  * @property string $post_description
- * @property string $post_author
  * @property int $post_status
  * @property string $post_type
  * @property int $likes_count
@@ -39,7 +38,7 @@ class Posts extends \yii\db\ActiveRecord
             [['user_id', 'post_type', 'created_date', 'modified_date'], 'required'],
             [['user_id', 'post_status', 'likes_count'], 'integer'],
             [['created_date', 'modified_date'], 'safe'],
-            [['post_title', 'post_subtitle', 'post_description', 'post_author'], 'string', 'max' => 50],
+            [['post_title', 'post_subtitle', 'post_description'], 'string', 'max' => 50],
             [['post_type', 'comment_count'], 'string', 'max' => 20],
         ];
     }
@@ -55,7 +54,6 @@ class Posts extends \yii\db\ActiveRecord
             'post_title' => 'Post Title',
             'post_subtitle' => 'Post Subtitle',
             'post_description' => 'Post Description',
-            'post_author' => 'Post Author',
             'post_status' => 'Post Status',
             'post_type' => 'Post Type',
             'likes_count' => 'Likes Count',

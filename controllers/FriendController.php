@@ -42,12 +42,24 @@ class FriendController extends ActiveController
     public function actionSuggestedFriendList()
     {
         $result = [];
-        $model = UserInfo::find()->select(['first_name','email','image','about_user'])->All();
+        $model = UserInfo::find()->select(['user_id','first_name','email','location','image','about_user'])->All();
         if(!empty($model)) {
+            $userDetails=[];
+            foreach ($model as $value){
+                $users =[
+                    "user_id"=>$value['user_id'],
+                    "fullname"=>$value['first_name'],
+                    "email"=>$value['email'],
+                    "location"=>$value['location'],
+                    "aboutme"=>$value['about_user']
+                ];
+                array_push($userDetails,$users);
+            }
+
             $result = [
                 "code" => 200,
                 "message" => "success",
-                "userData" => [$model],
+                "userData" => $userDetails,
             ];
         }else{
             $result = [

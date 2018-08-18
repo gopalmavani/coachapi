@@ -48,47 +48,57 @@ class HomeController extends ActiveController
     {
         $result = [];
         $request = JSON::decode(Yii::$app->request->getRawBody());
-        if((!empty($request['email'])) && ($request['userType'] == "coach" || $request['userType'] == "user" ) &&(!empty($request['password']) && (!empty($request['first_name'])) && ($request['registerType'] == "email" || $request['registerType'] == "facebook" || $request['registerType'] == "google" || $request['registerType'] == "insta" || $request['registerType'] == "linkedin"))){
-            $model = new UserInfo();
-            $model->attributes = $request;
-            if(!empty($request['focusArea'])) { $model->focus_areas = $request['focusArea'];}
-            if(!empty($request['aboutme'])){ $model->about_user = $request['aboutme'];}
-            $model->user_type = $request['userType'];
-            $model->password = md5($request['password']);
-            $model->date_of_registration = date('Y-m-d H:i:s');
-            $model->created_date = date('Y-m-d H:i:s');
-            $model->modified_date = date('Y-m-d H:i:s');
+        if((!empty($request['registerType'])) && (!empty($request['userType']))){
+            if((!empty($request['email'])) && ($request['userType'] == "coach" || $request['userType'] == "user" ) &&(!empty($request['password']) && (!empty($request['fullname'])) && ($request['registerType'] == "email" || $request['registerType'] == "facebook" || $request['registerType'] == "google" || $request['registerType'] == "insta" || $request['registerType'] == "linkedin"))){
+                $model = new UserInfo();
+                $model->attributes = $request;
+                if(!empty($request['socialId'])) { $model->social_id = $request['socialId'];}
+                if(!empty($request['fullname'])) { $model->first_name = $request['fullname'];}
+                if(!empty($request['focusArea'])) { $model->focus_areas = $request['focusArea'];}
+                if(!empty($request['aboutme'])){ $model->about_user = $request['aboutme'];}
+                $model->user_type = $request['userType'];
+                $model->password = md5($request['password']);
+                $model->date_of_registration = date('Y-m-d H:i:s');
+                $model->created_date = date('Y-m-d H:i:s');
+                $model->modified_date = date('Y-m-d H:i:s');
 //          MD5 hash for admin@123 is : e6e061838856bf47e1de730719fb2609
 //          $model->user_token = md5(uniqid($model->user_id, true));
-            if ($model->save()) {
-                $device = new DeviceLocation();
-                $device->attributes = $request;
-                if(isset($request['deviceId'])){
-                    $model->device_token = $request['deviceId'];
-                }
-                $device->event = "register";
-                $device->user_id = $model->user_id;
-                $device->created_date = date('Y-m-d H:i:s');
-                $device->modified_date = date('Y-m-d H:i:s');
-                $device->save();
-                $result = [
-                    "code" => 200,
-                    "message" => "success",
-                    "userId" => $model->user_id,
+                if ($model->save()) {
+                    $device = new DeviceLocation();
+                    $device->attributes = $request;
+                    if(isset($request['deviceId'])){
+                        $model->device_token = $request['deviceId'];
+                    }
+                    $device->event = "register";
+                    $device->user_id = $model->user_id;
+                    $device->created_date = date('Y-m-d H:i:s');
+                    $device->modified_date = date('Y-m-d H:i:s');
+                    $device->save();
+                    $result = [
+                        "code" => 200,
+                        "message" => "success",
+                        "userId" => $model->user_id,
 //                "userToken" => $model->user_token,
-                ];
-            } else {
+                    ];
+                } else {
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                        "errors" => [$model->errors],
+                    ];
+                }
+            }else{
                 $result = [
                     "code" => 500,
                     "message" => "failed",
-                    "errors" => [$model->errors],
+                    "errors" => "registerType or userType or email or password or fullname are required",
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
                 "message" => "failed",
-                "errors" => "registerType or userType or email or password or first_name are required",
+                "errors" => "registerType or userType are required",
             ];
         }
 
@@ -100,22 +110,23 @@ class HomeController extends ActiveController
     {
         $result = [];
         $request = JSON::decode(Yii::$app->request->getRawBody());
-        if ((($request['userType'] == "coach") || ($request['userType'] == "user")) && (!empty($request['deviceId'])) && ($request['deviceType'] == "ios" )|| ($request['deviceType'] == "android")) {
+
+        if (((!empty($request['userType'])) && ($request['userType'] == "coach") || ($request['userType'] == "user")) && (!empty($request['deviceId'])) && ($request['deviceType'] == "ios" )|| ($request['deviceType'] == "android")) {
             if (!empty($request['email']) && !empty($request['password'])) {
                 $user = UserInfo::findOne(["email" => $request['email'], "password" => md5($request['password'])]);
                 if (!empty($user)) {
                     $user->last_logged_in = date('Y-m-d H:i:s');
                     $user->save();
-                    if($user->gender == 1){
-                        $user->gender = "Female";
-                    }else{
-                        $user->gender = "male";
-                    }
-                    if($user->is_enabled == 1){
-                        $user->is_enabled = "yes";
-                    }else{
-                        $user->is_enabled = "no";
-                    }
+//                    if($user->gender == 1){
+//                        $user->gender = "Female";
+//                    }else{
+//                        $user->gender = "male";
+//                    }
+//                    if($user->is_enabled == 1){
+//                        $user->is_enabled = "yes";
+//                    }else{
+//                        $user->is_enabled = "no";
+//                    }
                     $userDetails = [
                         "userId"=>$user['user_id'],
                         "userType"=>$user['user_type'],
@@ -126,10 +137,12 @@ class HomeController extends ActiveController
                         "aboutme"=>$user->about_user,
                         "goals"=>$user->goals,
                         "focus_area"=>$user->focus_areas,
+                        "location"=>$user->location,
                         "city"=>$user->city,
                         "country"=>$user->country,
                         "profession"=>$user->profession,
-                        "is_verified"=> $user->is_enabled
+                        "is_verified"=> $user->is_enabled,
+                        "user_profile_image" => $user->image
                     ];
 
                     $result = [
@@ -175,16 +188,7 @@ class HomeController extends ActiveController
                     if (!empty($user)) {
                         $user->last_logged_in = date('Y-m-d H:i:s');
                         $user->save();
-                        if($user->gender == 1){
-                            $user->gender = "Female";
-                        }else{
-                            $user->gender = "male";
-                        }
-                        if($user->is_enabled == 1){
-                            $user->is_enabled = "yes";
-                        }else{
-                            $user->is_enabled = "no";
-                        }
+
                         $userDetails = [
                             "userId"=>$user['user_id'],
                             "userType"=>$user['user_type'],
@@ -195,10 +199,12 @@ class HomeController extends ActiveController
                             "aboutme"=>$user->about_user,
                             "goals"=>$user->goals,
                             "focus_area"=>$user->focus_areas,
+                            "location"=>$user->location,
                             "city"=>$user->city,
                             "country"=>$user->country,
                             "profession"=>$user->profession,
-                            "is_verified"=> $user->is_enabled
+                            "is_verified"=> $user->is_enabled,
+                            "user_profile_image"=>$user->image
                         ];
                         $result = [
                             "code" => 200,
@@ -301,6 +307,10 @@ class HomeController extends ActiveController
                 $request = JSON::decode(Yii::$app->request->getRawBody());
                 if(!empty($request)){
                     $user->attributes = $request;
+                    if(!empty($request['socialId'])) { $user->social_id = $request['socialId'];}
+                    if(!empty($request['fullname'])) { $user->first_name = $request['fullname'];}
+                    if(!empty($request['focusArea'])) { $user->focus_areas = $request['focusArea'];}
+                    if(!empty($request['aboutme'])){ $user->about_user = $request['aboutme'];}
                     $user->modified_date = date('Y-m-d H:i:s');
                     if($user->save()){
                         $device = DeviceLocation::findOne(["user_id" => $id]);
@@ -481,6 +491,7 @@ class HomeController extends ActiveController
                 if(!empty($model)){
                     $model->attributes = $request;
                     $model->user_id = $user_id;
+                    $model->event = "register";
                     $model->device_token = $request['deviceToken'];
                     $model->created_date = date('Y-m-d H:i:s');
                     $model->modified_date = date('Y-m-d H:i:s');
@@ -501,6 +512,7 @@ class HomeController extends ActiveController
                     $device->attributes = $request;
                     $model->device_token = $request['deviceToken'];
                     $device->user_id = $user_id;
+                    $model->event = "register";
                     $device->created_date = date('Y-m-d H:i:s');
                     $device->modified_date = date('Y-m-d H:i:s');
                     if ($device->save()) {
