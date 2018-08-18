@@ -48,49 +48,57 @@ class HomeController extends ActiveController
     {
         $result = [];
         $request = JSON::decode(Yii::$app->request->getRawBody());
-        if((!empty($request['email'])) && ($request['userType'] == "coach" || $request['userType'] == "user" ) &&(!empty($request['password']) && (!empty($request['fullname'])) && ($request['registerType'] == "email" || $request['registerType'] == "facebook" || $request['registerType'] == "google" || $request['registerType'] == "insta" || $request['registerType'] == "linkedin"))){
-            $model = new UserInfo();
-            $model->attributes = $request;
-            if(!empty($request['socialId'])) { $model->social_id = $request['socialId'];}
-            if(!empty($request['fullname'])) { $model->first_name = $request['fullname'];}
-            if(!empty($request['focusArea'])) { $model->focus_areas = $request['focusArea'];}
-            if(!empty($request['aboutme'])){ $model->about_user = $request['aboutme'];}
-            $model->user_type = $request['userType'];
-            $model->password = md5($request['password']);
-            $model->date_of_registration = date('Y-m-d H:i:s');
-            $model->created_date = date('Y-m-d H:i:s');
-            $model->modified_date = date('Y-m-d H:i:s');
+        if((!empty($request['registerType'])) && (!empty($request['userType']))){
+            if((!empty($request['email'])) && ($request['userType'] == "coach" || $request['userType'] == "user" ) &&(!empty($request['password']) && (!empty($request['fullname'])) && ($request['registerType'] == "email" || $request['registerType'] == "facebook" || $request['registerType'] == "google" || $request['registerType'] == "insta" || $request['registerType'] == "linkedin"))){
+                $model = new UserInfo();
+                $model->attributes = $request;
+                if(!empty($request['socialId'])) { $model->social_id = $request['socialId'];}
+                if(!empty($request['fullname'])) { $model->first_name = $request['fullname'];}
+                if(!empty($request['focusArea'])) { $model->focus_areas = $request['focusArea'];}
+                if(!empty($request['aboutme'])){ $model->about_user = $request['aboutme'];}
+                $model->user_type = $request['userType'];
+                $model->password = md5($request['password']);
+                $model->date_of_registration = date('Y-m-d H:i:s');
+                $model->created_date = date('Y-m-d H:i:s');
+                $model->modified_date = date('Y-m-d H:i:s');
 //          MD5 hash for admin@123 is : e6e061838856bf47e1de730719fb2609
 //          $model->user_token = md5(uniqid($model->user_id, true));
-            if ($model->save()) {
-                $device = new DeviceLocation();
-                $device->attributes = $request;
-                if(isset($request['deviceId'])){
-                    $model->device_token = $request['deviceId'];
-                }
-                $device->event = "register";
-                $device->user_id = $model->user_id;
-                $device->created_date = date('Y-m-d H:i:s');
-                $device->modified_date = date('Y-m-d H:i:s');
-                $device->save();
-                $result = [
-                    "code" => 200,
-                    "message" => "success",
-                    "userId" => $model->user_id,
+                if ($model->save()) {
+                    $device = new DeviceLocation();
+                    $device->attributes = $request;
+                    if(isset($request['deviceId'])){
+                        $model->device_token = $request['deviceId'];
+                    }
+                    $device->event = "register";
+                    $device->user_id = $model->user_id;
+                    $device->created_date = date('Y-m-d H:i:s');
+                    $device->modified_date = date('Y-m-d H:i:s');
+                    $device->save();
+                    $result = [
+                        "code" => 200,
+                        "message" => "success",
+                        "userId" => $model->user_id,
 //                "userToken" => $model->user_token,
-                ];
-            } else {
+                    ];
+                } else {
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                        "errors" => [$model->errors],
+                    ];
+                }
+            }else{
                 $result = [
                     "code" => 500,
                     "message" => "failed",
-                    "errors" => [$model->errors],
+                    "errors" => "registerType or userType or email or password or fullname are required",
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
                 "message" => "failed",
-                "errors" => "registerType or userType or email or password or fullname are required",
+                "errors" => "registerType or userType are required",
             ];
         }
 
