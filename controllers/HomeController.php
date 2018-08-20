@@ -645,59 +645,69 @@ class HomeController extends ActiveController
         $headers = Yii::$app->request->headers;
         $user_id = $headers['user_id'];
         if(!empty($user_id)){
-            $request = JSON::decode(Yii::$app->request->getRawBody());
-            if(isset($request['latitude']) && isset($request['longitude']) && isset($request['deviceToken'])){
-                $model = DeviceLocation::findOne(["user_id" => $user_id]);
-                if(!empty($model)){
-                    $model->attributes = $request;
-                    $model->user_id = $user_id;
-                    $model->event = "register";
-                    $model->device_token = $request['deviceToken'];
-                    $model->created_date = date('Y-m-d H:i:s');
-                    $model->modified_date = date('Y-m-d H:i:s');
-                    if ($model->save()) {
-                        $result = [
-                            "code" => 200,
-                            "message" => "success",
-                        ];
-                    } else {
-                        $result = [
-                            "code" => 500,
-                            "message" => "failed",
-                            "error" => [$model->errors],
-                        ];
+            $user = UserInfo::findOne(["user_id" => $user_id]);
+            if(!empty($user)){
+                $request = JSON::decode(Yii::$app->request->getRawBody());
+                if(isset($request['latitude']) && isset($request['longitude']) && isset($request['deviceToken'])){
+                    $model = DeviceLocation::findOne(["user_id" => $user_id]);
+                    if(!empty($model)){
+                        $model->attributes = $request;
+                        $model->user_id = $user_id;
+                        $model->event = "register";
+                        $model->device_token = $request['deviceToken'];
+                        $model->created_date = date('Y-m-d H:i:s');
+                        $model->modified_date = date('Y-m-d H:i:s');
+                        if ($model->save()) {
+                            $result = [
+                                "code" => 200,
+                                "message" => "success",
+                            ];
+                        } else {
+                            $result = [
+                                "code" => 500,
+                                "message" => "failed",
+                                "error" => [$model->errors],
+                            ];
+                        }
+                    }else{
+                        $device = new DeviceLocation();
+                        $device->attributes = $request;
+                        $model->device_token = $request['deviceToken'];
+                        $device->user_id = $user_id;
+                        $model->event = "register";
+                        $device->created_date = date('Y-m-d H:i:s');
+                        $device->modified_date = date('Y-m-d H:i:s');
+                        if ($device->save()) {
+                            $result = [
+                                "code" => 200,
+                                "message" => "success",
+                            ];
+                        } else {
+                            $result = [
+                                "code" => 500,
+                                "message" => "failed",
+                                "error" => [$device->errors],
+                            ];
+                        }
                     }
                 }else{
-                    $device = new DeviceLocation();
-                    $device->attributes = $request;
-                    $model->device_token = $request['deviceToken'];
-                    $device->user_id = $user_id;
-                    $model->event = "register";
-                    $device->created_date = date('Y-m-d H:i:s');
-                    $device->modified_date = date('Y-m-d H:i:s');
-                    if ($device->save()) {
-                        $result = [
-                            "code" => 200,
-                            "message" => "success",
-                        ];
-                    } else {
-                        $result = [
-                            "code" => 500,
-                            "message" => "failed",
-                            "error" => [$device->errors],
-                        ];
-                    }
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                    ];
                 }
             }else{
                 $result = [
                     "code" => 500,
                     "message" => "failed",
+                    "erorr" => "user not found",
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
-                "message" => "cant get id of user",
+                "message" => "failed",
+                "erorr" => "user id can not blank",
             ];
         }
 
