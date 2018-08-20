@@ -59,12 +59,7 @@ class UserInfo extends \yii\db\ActiveRecord
             [['email', 'about_user', 'focus_areas', 'location', 'profession', 'image'], 'string', 'max' => 100],
             [['user_type', 'house_number'], 'string', 'max' => 20],
             [['pincode'], 'string', 'max' => 10],
-
-            [['phone'], 'number'],
-
-            // email has to be a valid email address
-            ['email', 'email'],
-
+            [['phone'], 'string', 'max' => 12],
             [['email'], 'unique'],
         ];
     }
