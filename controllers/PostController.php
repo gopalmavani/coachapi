@@ -122,39 +122,67 @@ class PostController extends ActiveController
             if($users){
                 $request = JSON::decode(Yii::$app->request->getRawBody());
                 $post_id = $request['post_id'];
-                $likeuser = Likes::find()->where(['user_id'=>$user_id,"post_id"=>$post_id])->one();
-                if(empty($likeuser)){
-                    $model = new Likes();
-                    $model->attributes = $request;
-                    $model->user_id = $user_id;
-                    $model->created_date = date('Y-m-d H:i:s');
-                    $model->modified_date = date('Y-m-d H:i:s');
-                    if($model->save()){
-                        $Posts = Posts::find()->where(['post_id'=>$post_id])->one();
-                        if(empty($Posts->likes_count)){ $likes = 0; }else{$likes = $Posts->likes_count;}
-                        $Posts->likes_count = $likes + 1;
-                        if($Posts->save()){
-                            $result = [
-                                "code" => 200,
-                                "message" => "success",
-                            ];
+                if(!empty($post_id)){
+                    $post =  Posts::findOne($post_id);
+                    if($post){
+                        $likeuser = Likes::find()->where(['user_id'=>$user_id,"post_id"=>$post_id])->one();
+                        if(empty($likeuser)){
+                            $model = new Likes();
+                            $model->attributes = $request;
+                            $model->user_id = $user_id;
+                            $model->created_date = date('Y-m-d H:i:s');
+                            $model->modified_date = date('Y-m-d H:i:s');
+                            if($model->save()){
+                                $Posts = Posts::find()->where(['post_id'=>$post_id])->one();
+                                if(empty($Posts->likes_count)){ $likes = 0; }else{$likes = $Posts->likes_count;}
+                                $Posts->likes_count = $likes + 1;
+                                if($Posts->save()){
+                                    $result = [
+                                        "code" => 200,
+                                        "message" => "Liked Successfully",
+                                    ];
+                                }else{
+                                    $result = [
+                                        "code" => 500,
+                                        "message" => "failed",
+                                        "error"=> [$Posts->errors],
+                                    ];
+                                }
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "failed",
+                                ];
+                            }
                         }else{
-                            $result = [
-                                "code" => 500,
-                                "message" => "failed",
-                                "error"=> [$Posts->errors],
-                            ];
+                            if($likeuser->delete()){
+                                $result = [
+                                    "code" => 200,
+                                    "message" => "Disliked Successfully",
+                                ];
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "failed",
+                                ];
+                            }
+//                            $result = [
+//                                "code" => 500,
+//                                "message" => "already Liked",
+//                            ];
                         }
                     }else{
                         $result = [
                             "code" => 500,
                             "message" => "failed",
+                            "error" => "post not found"
                         ];
                     }
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "already Liked",
+                        "message" => "failed",
+                        "error" => "post id can not blank"
                     ];
                 }
             }else{
@@ -173,58 +201,6 @@ class PostController extends ActiveController
         echo JSON::encode($result);
     }
 
-    //like group
-
-    public function actionLikeGroup()
-    {
-        $headers = Yii::$app->request->headers;
-        $user_id = $headers['user_id'];
-        if(!empty($user_id)){
-            $request = JSON::decode(Yii::$app->request->getRawBody());
-            $group_id = $request['group_id'];
-            $likeuser = GroupLikes::find()->where(['user_id'=>$user_id,"group_id"=>$group_id])->one();
-            if(empty($likeuser)){
-                $model = new GroupLikes();
-                $model->attributes = $request;
-                $model->user_id = $user_id;
-                $model->created_date = date('Y-m-d H:i:s');
-                $model->modified_date = date('Y-m-d H:i:s');
-                if($model->save()){
-                    $group = GroupInfo::find()->where(['group_id'=>$group_id])->one();
-                    if(empty($group->likes_count)){ $likes = 0; }else{$likes = $group->likes_count;}
-                    $group->likes_count = $likes + 1;
-                    if($group->save()){
-                        $result = [
-                            "code" => 200,
-                            "message" => "success",
-                        ];
-                    }else{
-                        $result = [
-                            "code" => 500,
-                            "message" => "failed",
-                            "error"=> [$group->errors],
-                        ];
-                    }
-                }else{
-                    $result = [
-                        "code" => 500,
-                        "message" => "failed",
-                    ];
-                }
-            }else{
-                $result = [
-                    "code" => 500,
-                    "message" => "already Liked",
-                ];
-            }
-        }else{
-            $result = [
-                "code" => 500,
-                "message" => "failed",
-            ];
-        }
-        echo JSON::encode($result);
-    }
 
     //comment post
 
@@ -233,38 +209,53 @@ class PostController extends ActiveController
         $result = [];
         $headers = Yii::$app->request->headers;
         $user_id = $headers['user_id'];
-        $request = JSON::decode(Yii::$app->request->getRawBody());
-        $post_id = $request['post_id'];
-        if(!empty($user_id) && !empty($post_id)) {
-            $post = Posts::findOne(["post_id" => $post_id]);
-            if(!empty($post)){
-                $model = new Comments();
-                $model->attributes = $request;
-                $model->user_id = $user_id;
-                $model->created_date = date('Y-m-d H:i:s');
-                $model->modified_date = date('Y-m-d H:i:s');
-                if($model->save()){
-                    $result = [
-                        "code" => 200,
-                        "message" => "success",
-                    ];
+        if(!empty($user_id)){
+            $users =  UserInfo::findOne($user_id);
+            if($users){
+                $request = JSON::decode(Yii::$app->request->getRawBody());
+                $post_id = $request['post_id'];
+                if(!empty($post_id)) {
+                    $post = Posts::findOne(["post_id" => $post_id]);
+                    if(!empty($post)){
+                        $model = new Comments();
+                        $model->attributes = $request;
+                        $model->user_id = $user_id;
+                        $model->created_date = date('Y-m-d H:i:s');
+                        $model->modified_date = date('Y-m-d H:i:s');
+                        if($model->save()){
+                            $result = [
+                                "code" => 200,
+                                "message" => "success",
+                            ];
+                        }else{
+                            $result = [
+                                "code" => 500,
+                                "message" => "failed",
+                                "error"=> [$model->errors],
+                            ];
+                        }
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "post id not available",
+                        ];
+                    }
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "failed",
-                        "error"=> [$model->errors],
+                        "message" => "post id not available",
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "post id not available",
+                    "message" => "user not found",
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
-                "message" => "post id or user id not available",
+                "message" => "user id can not blank",
             ];
         }
         echo JSON::encode($result);
@@ -379,7 +370,7 @@ class PostController extends ActiveController
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "no data available",
+                        "message" => "no likes available",
                     ];
                 }
             }else{

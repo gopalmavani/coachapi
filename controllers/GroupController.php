@@ -47,6 +47,7 @@ class GroupController extends ActiveController
             if($users){
                 $model = new GroupInfo();
                 $model->attributes = Yii::$app->request->post();
+                $model->user_id = $user_id;
                 $image = UploadedFile::getInstancesByName('group_image');
                 $model->created_date = date('Y-m-d H:i:s');
                 $model->modified_date = date('Y-m-d H:i:s');
@@ -125,26 +126,47 @@ class GroupController extends ActiveController
 
     public function actionGroupList()
     {
-        $model = GroupInfo::find()->select(['group_name','group_id','group_image'])->All();
-        $data = [];
-        if(!empty($model)){
-            foreach ($model as $user){
-                $countuser = GroupMapping::findAll(['group_id'=>$user->group_id]);
-                $countuser = count($countuser);
-                array_push($data,["group_id"=>$user->group_id,"group_name"=>$user->group_name,"no_of_user"=>$countuser,"group_image"=>$user->group_image]);
-            };
-            $result = [
-                "code" => 200,
-                "message" => "success",
-                "groupData" => $data,
-            ];
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)) {
+            $users = UserInfo::findOne($user_id);
+            if ($users) {
+                $model = GroupInfo::find()->select(['group_name','group_id','group_image','user_id'])->where(['user_id'=>$user_id])->All();
+                $data = [];
+                if(!empty($model)){
+                    foreach ($model as $user){
+
+                        $countuser = GroupMapping::findAll(['group_id'=>$user->group_id]);
+                        $countuser = count($countuser);
+                        array_push($data,["group_id"=>$user->group_id,"group_name"=>$user->group_name,"no_of_user"=>$countuser,"group_image"=>$user->group_image,'created_by'=>$user->user_id]);
+                    };
+                    $result = [
+                        "code" => 200,
+                        "message" => "success",
+                        "groupData" => $data,
+                    ];
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                        "errors" => "no data",
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "failed",
+                    "errors" => "user not found",
+                ];
+            }
         }else{
             $result = [
                 "code" => 500,
                 "message" => "failed",
-                "errors" => "no data",
+                "errors" => "user id can not blank",
             ];
         }
+
         echo JSON::encode($result);
     }
 
@@ -185,31 +207,40 @@ class GroupController extends ActiveController
         if(!empty($user_id && $group_id)){
             $users =  UserInfo::findOne($user_id);
             if($users){
-                $grouped = GroupMapping::findOne(["user_id"=>$user_id,"group_id"=>$group_id]);
-                if(empty($grouped)){
-                    $GroupMapping = new GroupMapping();
-                    $GroupMapping->group_id = $group_id;
-                    $GroupMapping->user_id = $user_id;
-                    $GroupMapping->added_by_user_id = $user_id;
-                    $GroupMapping->created_date = date('Y-m-d H:i:s');
-                    $GroupMapping->modified_date = date('Y-m-d H:i:s');
-                    if($GroupMapping->save()){
-                        $result = [
-                            "code" => 200,
-                            "message" => "success",
-                        ];
+                $group = GroupInfo::findOne($group_id);
+                if($group){
+                    $grouped = GroupMapping::findOne(["user_id"=>$user_id,"group_id"=>$group_id]);
+                    if(empty($grouped)){
+                        $GroupMapping = new GroupMapping();
+                        $GroupMapping->group_id = $group_id;
+                        $GroupMapping->user_id = $user_id;
+                        $GroupMapping->added_by_user_id = $user_id;
+                        $GroupMapping->created_date = date('Y-m-d H:i:s');
+                        $GroupMapping->modified_date = date('Y-m-d H:i:s');
+                        if($GroupMapping->save()){
+                            $result = [
+                                "code" => 200,
+                                "message" => "success",
+                            ];
+                        }else{
+                            $result = [
+                                "code" => 500,
+                                "message" => "failed",
+                                "errors" => [$GroupMapping->errors],
+                            ];
+                        }
                     }else{
                         $result = [
                             "code" => 500,
                             "message" => "failed",
-                            "errors" => [$GroupMapping->errors],
+                            "errors" => "Already Added Member",
                         ];
                     }
                 }else{
                     $result = [
                         "code" => 500,
                         "message" => "failed",
-                        "errors" => "Already Added Member",
+                        "errors" => "group does not exist",
                     ];
                 }
             }else{
@@ -224,7 +255,6 @@ class GroupController extends ActiveController
             $result = [
                 "code" => 500,
                 "message" => "failed",
-                "errors" => "no data",
             ];
         }
         echo JSON::encode($result);
@@ -330,4 +360,84 @@ class GroupController extends ActiveController
         }
         echo JSON::encode($result);
     }
+
+    //like group
+
+    public function actionLikeGroup()
+    {
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $users =  UserInfo::findOne($user_id);
+            if($users){
+                $request = JSON::decode(Yii::$app->request->getRawBody());
+                $group_id = $request['group_id'];
+                if(!empty($group_id)){
+                    $group = GroupInfo::findOne($group_id);
+                    if(!empty($group)){
+                        $likeuser = GroupLikes::find()->where(['user_id'=>$user_id,"group_id"=>$group_id])->one();
+                        if(empty($likeuser)){
+                            $model = new GroupLikes();
+                            $model->attributes = $request;
+                            $model->user_id = $user_id;
+                            $model->created_date = date('Y-m-d H:i:s');
+                            $model->modified_date = date('Y-m-d H:i:s');
+                            if($model->save()){
+                                $group = GroupInfo::find()->where(['group_id'=>$group_id])->one();
+                                if(empty($group->likes_count)){ $likes = 0; }else{$likes = $group->likes_count;}
+                                $group->likes_count = $likes + 1;
+                                if($group->save()){
+                                    $result = [
+                                        "code" => 200,
+                                        "message" => "success",
+                                    ];
+                                }else{
+                                    $result = [
+                                        "code" => 500,
+                                        "message" => "failed",
+                                        "error"=> [$group->errors],
+                                    ];
+                                }
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "failed",
+                                ];
+                            }
+                        }else{
+                            $result = [
+                                "code" => 500,
+                                "message" => "already Liked",
+                            ];
+                        }
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "error"=> "group not found",
+                        ];
+                    }
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                        "error"=> "group id can not blank",
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "failed",
+                    "error"=> "user not found",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "failed",
+            ];
+        }
+        echo JSON::encode($result);
+    }
+
 }
