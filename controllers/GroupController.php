@@ -43,51 +43,63 @@ class GroupController extends ActiveController
         $headers = Yii::$app->request->headers;
         $user_id = $headers['user_id'];
         if(!empty($user_id)){
-            $model = new GroupInfo();
-            $model->attributes = Yii::$app->request->post();
-            $image = UploadedFile::getInstancesByName('group_image');
-            $model->created_date = date('Y-m-d H:i:s');
-            $model->modified_date = date('Y-m-d H:i:s');
-            if(!empty($image)){
-                foreach ($image as $file){
-                    $path = Yii::getAlias('@webroot').'/uploads/group/'.$file->name; //Generate your save file path here;
-                    $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
-                    $model->group_image = $file->name;
-                }
-            }
-            if($model->save()){
-                if(!empty($data['memberList'])){
-                    $datamember = explode(",",$data['memberList']);
-                    foreach ($datamember as $user){
-                        $GroupMapping = new GroupMapping();
-                        $GroupMapping->user_id = $user;
-                        $GroupMapping->added_by_user_id = $user_id;
-                        $GroupMapping->group_id = $model->group_id;
-                        $GroupMapping->created_date = date('Y-m-d H:i:s');
-                        $GroupMapping->modified_date = date('Y-m-d H:i:s');
-                        $GroupMapping->save();
+           $users =  UserInfo::findOne($user_id);
+            if($users){
+                $model = new GroupInfo();
+                $model->attributes = Yii::$app->request->post();
+                $image = UploadedFile::getInstancesByName('group_image');
+                $model->created_date = date('Y-m-d H:i:s');
+                $model->modified_date = date('Y-m-d H:i:s');
+                if(!empty($image)){
+                    foreach ($image as $file){
+                        $path = Yii::getAlias('@webroot').'/uploads/group/'.$file->name; //Generate your save file path here;
+                        $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
+                        $model->group_image = $file->name;
                     }
-                    $result = [
-                        "code" => 200,
-                        "message" => "success",
-                    ];
+                }
+                if($model->save()){
+                    if(!empty($data['memberList'])){
+                        $datamember = explode(",",$data['memberList']);
+                        foreach ($datamember as $user){
+                            $GroupMapping = new GroupMapping();
+                            $GroupMapping->user_id = $user;
+                            $GroupMapping->added_by_user_id = $user_id;
+                            $GroupMapping->group_id = $model->group_id;
+                            $GroupMapping->created_date = date('Y-m-d H:i:s');
+                            $GroupMapping->modified_date = date('Y-m-d H:i:s');
+                            $GroupMapping->save();
+                        }
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                            "group_id" => $model->group_id
+                        ];
+                    }else{
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                        ];
+                    }
                 }else{
                     $result = [
-                        "code" => 200,
-                        "message" => "success",
+                        "code" => 500,
+                        "message" => "failed",
+                        "errors" => [$model->errors],
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
                     "message" => "failed",
-                    "errors" => [$model->errors],
+                    "error"=>"user does not exist",
                 ];
             }
+
         }else{
             $result = [
                 "code" => 500,
-                "message" => "user id not available",
+                "message" => "failed",
+                "error" => "user id not available",
             ];
         }
     echo JSON::encode($result);
@@ -113,7 +125,8 @@ class GroupController extends ActiveController
         }else{
             $result = [
                 "code" => 500,
-                "message" => "no data",
+                "message" => "failed",
+                "errors" => "no data",
             ];
         }
         echo JSON::encode($result);
@@ -154,36 +167,48 @@ class GroupController extends ActiveController
         $request = JSON::decode(Yii::$app->request->getRawBody());
         $group_id = $request['group_id'];
         if(!empty($user_id && $group_id)){
-            $grouped = GroupMapping::findOne(["user_id"=>$user_id,"group_id"=>$group_id]);
-            if(empty($grouped)){
-                $GroupMapping = new GroupMapping();
-                $GroupMapping->group_id = $group_id;
-                $GroupMapping->user_id = $user_id;
-                $GroupMapping->added_by_user_id = $user_id;
-                $GroupMapping->created_date = date('Y-m-d H:i:s');
-                $GroupMapping->modified_date = date('Y-m-d H:i:s');
-                if($GroupMapping->save()){
-                    $result = [
-                        "code" => 200,
-                        "message" => "success",
-                    ];
+            $users =  UserInfo::findOne($user_id);
+            if($users){
+                $grouped = GroupMapping::findOne(["user_id"=>$user_id,"group_id"=>$group_id]);
+                if(empty($grouped)){
+                    $GroupMapping = new GroupMapping();
+                    $GroupMapping->group_id = $group_id;
+                    $GroupMapping->user_id = $user_id;
+                    $GroupMapping->added_by_user_id = $user_id;
+                    $GroupMapping->created_date = date('Y-m-d H:i:s');
+                    $GroupMapping->modified_date = date('Y-m-d H:i:s');
+                    if($GroupMapping->save()){
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                        ];
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "errors" => [$GroupMapping->errors],
+                        ];
+                    }
                 }else{
                     $result = [
                         "code" => 500,
                         "message" => "failed",
-                        "errors" => [$GroupMapping->errors],
+                        "errors" => "Already Added Member",
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "Already Added Member",
+                    "message" => "failed",
+                    "errors" => "user does not exist",
                 ];
             }
+
         }else{
             $result = [
                 "code" => 500,
-                "message" => "no data",
+                "message" => "failed",
+                "errors" => "no data",
             ];
         }
         echo JSON::encode($result);
@@ -196,24 +221,46 @@ class GroupController extends ActiveController
         $headers = Yii::$app->request->headers;
         $user_id = $headers['user_id'];
         $request = JSON::decode(Yii::$app->request->getRawBody());
-        $group_id = $request['group_id'];
+        if(isset($request['group_id'])){
+            $group_id = $request['group_id'];
+        }else{
+            $group_id = "";
+        }
         if(!empty($user_id && $group_id)){
-            $grouped = GroupMapping::findOne(["user_id"=>$user_id,"group_id"=>$group_id]);
-            if($grouped->delete()){
-                $result = [
-                "code" => 200,
-                "message" => "success",
-            ];
+            $users =  UserInfo::findOne($user_id);
+            if($users){
+                $grouped = GroupMapping::findOne(["user_id"=>$user_id,"group_id"=>$group_id]);
+                if($grouped){
+                    if($grouped->delete()){
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                        ];
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                        ];
+                    }
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                        "error"=>"group id does not exist"
+                    ];
+                }
             }else{
                 $result = [
                     "code" => 500,
                     "message" => "failed",
+                    "error"=>"user does not exist"
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
-                "message" => "no data",
+                "message" => "failed",
+                "errors" => "no data",
             ];
         }
         echo JSON::encode($result);
@@ -228,23 +275,36 @@ class GroupController extends ActiveController
         $request = JSON::decode(Yii::$app->request->getRawBody());
         $group_id = $request['group_id'];
         if(!empty($user_id && $group_id && $request['members_id'])){
-            $datamember = explode(",",$request['members_id']);
-            foreach ($datamember as $user){
-                $grouped = GroupMapping::findOne(["user_id"=>$user,"group_id"=>$group_id]);
-                if(empty($grouped)){
-                    $GroupMapping = new GroupMapping();
-                    $GroupMapping->user_id = $user;
-                    $GroupMapping->added_by_user_id = $user_id;
-                    $GroupMapping->group_id = $group_id;
-                    $GroupMapping->created_date = date('Y-m-d H:i:s');
-                    $GroupMapping->modified_date = date('Y-m-d H:i:s');
-                    $GroupMapping->save();
-                    $result = [
-                        "code" => 200,
-                        "message" => "success",
-                    ];
+            $users =  UserInfo::findOne($user_id);
+            $groups = GroupInfo::findOne($group_id);
+            $member = UserInfo::findOne($user_id);
+            if($users && $groups && $request['members_id']){
+                $datamember = explode(",",$request['members_id']);
+                foreach ($datamember as $user){
+                    $grouped = GroupMapping::findOne(["user_id"=>$user,"group_id"=>$group_id]);
+                    if(empty($grouped)){
+                        $GroupMapping = new GroupMapping();
+                        $GroupMapping->user_id = $user;
+                        $GroupMapping->added_by_user_id = $user_id;
+                        $GroupMapping->group_id = $group_id;
+                        $GroupMapping->created_date = date('Y-m-d H:i:s');
+                        $GroupMapping->modified_date = date('Y-m-d H:i:s');
+                        $GroupMapping->save();
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                        ];
+                    }
                 }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "failed",
+                    "error"=>"user or group or meber does not exist"
+                ];
             }
+
+
         }else{
             $result = [
                 "code" => 500,
