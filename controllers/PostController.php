@@ -213,6 +213,85 @@ class PostController extends ActiveController
         echo JSON::encode($result);
     }
 
+    //like group
+
+    public function actionLikeGroup()
+    {
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $users =  UserInfo::findOne($user_id);
+            if($users){
+                $request = JSON::decode(Yii::$app->request->getRawBody());
+                $group_id = $request['group_id'];
+                if(!empty($group_id)){
+                    $group = GroupInfo::findOne($group_id);
+                    if(!empty($group)){
+                        $likeuser = GroupLikes::find()->where(['user_id'=>$user_id,"group_id"=>$group_id])->one();
+                        if(empty($likeuser)){
+                            $model = new GroupLikes();
+                            $model->attributes = $request;
+                            $model->user_id = $user_id;
+                            $model->created_date = date('Y-m-d H:i:s');
+                            $model->modified_date = date('Y-m-d H:i:s');
+                            if($model->save()){
+                                $group = GroupInfo::find()->where(['group_id'=>$group_id])->one();
+                                if(empty($group->likes_count)){ $likes = 0; }else{$likes = $group->likes_count;}
+                                $group->likes_count = $likes + 1;
+                                if($group->save()){
+                                    $result = [
+                                        "code" => 200,
+                                        "message" => "success",
+                                    ];
+                                }else{
+                                    $result = [
+                                        "code" => 500,
+                                        "message" => "failed",
+                                        "error"=> [$group->errors],
+                                    ];
+                                }
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "failed",
+                                ];
+                            }
+                        }else{
+                            $result = [
+                                "code" => 500,
+                                "message" => "already Liked",
+                            ];
+                        }
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "error"=> "group not found",
+                        ];
+                    }
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                        "error"=> "group id can not blank",
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "failed",
+                    "error"=> "user not found",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "failed",
+            ];
+        }
+        echo JSON::encode($result);
+    }
+
 
     //comment post
 
