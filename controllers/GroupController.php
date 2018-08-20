@@ -61,19 +61,35 @@ class GroupController extends ActiveController
                     if(!empty($data['memberList'])){
                         $datamember = explode(",",$data['memberList']);
                         foreach ($datamember as $user){
-                            $GroupMapping = new GroupMapping();
-                            $GroupMapping->user_id = $user;
-                            $GroupMapping->added_by_user_id = $user_id;
-                            $GroupMapping->group_id = $model->group_id;
-                            $GroupMapping->created_date = date('Y-m-d H:i:s');
-                            $GroupMapping->modified_date = date('Y-m-d H:i:s');
-                            $GroupMapping->save();
+                            $users_data = UserInfo::findOne($user);
+                            if($users_data){
+                                $GroupMapping = new GroupMapping();
+                                $GroupMapping->user_id = $user;
+                                $GroupMapping->added_by_user_id = $user_id;
+                                $GroupMapping->group_id = $model->group_id;
+                                $GroupMapping->created_date = date('Y-m-d H:i:s');
+                                $GroupMapping->modified_date = date('Y-m-d H:i:s');
+                                if($GroupMapping->save()){
+                                    $result = [
+                                        "code" => 200,
+                                        "message" => "success",
+                                        "group_id" => $model->group_id
+                                    ];
+                                }else{
+                                    $result = [
+                                        "code" => 500,
+                                        "message" => "failed",
+                                        "error"=>$GroupMapping->errors,
+                                    ];
+                                }
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "failed",
+                                    "error"=>"user id ".$user." does not exist",
+                                ];
+                            }
                         }
-                        $result = [
-                            "code" => 200,
-                            "message" => "success",
-                            "group_id" => $model->group_id
-                        ];
                     }else{
                         $result = [
                             "code" => 200,
@@ -228,7 +244,8 @@ class GroupController extends ActiveController
         }
         if(!empty($user_id && $group_id)){
             $users =  UserInfo::findOne($user_id);
-            if($users){
+            $group = GroupInfo::findOne($group_id);
+            if($users && $group){
                 $grouped = GroupMapping::findOne(["user_id"=>$user_id,"group_id"=>$group_id]);
                 if($grouped){
                     if($grouped->delete()){
@@ -246,14 +263,14 @@ class GroupController extends ActiveController
                     $result = [
                         "code" => 500,
                         "message" => "failed",
-                        "error"=>"group id does not exist"
+                        "error"=>"user does not exist in group"
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
                     "message" => "failed",
-                    "error"=>"user does not exist"
+                    "error"=>"user or group does not exist"
                 ];
             }
         }else{

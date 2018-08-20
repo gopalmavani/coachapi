@@ -48,60 +48,104 @@ class HomeController extends ActiveController
     {
         $result = [];
         $request = JSON::decode(Yii::$app->request->getRawBody());
-        if((!empty($request['registerType'])) && (!empty($request['userType']))){
-            if((!empty($request['email'])) && ($request['userType'] == "coach" || $request['userType'] == "user" ) &&(!empty($request['password']) && (!empty($request['fullname'])) && ($request['registerType'] == "email" || $request['registerType'] == "facebook" || $request['registerType'] == "google" || $request['registerType'] == "insta" || $request['registerType'] == "linkedin"))){
-                $model = new UserInfo();
-                $model->attributes = $request;
-                if(!empty($request['socialId'])) { $model->social_id = $request['socialId'];}
-                if(!empty($request['fullname'])) { $model->first_name = $request['fullname'];}
-                if(!empty($request['focusArea'])) { $model->focus_areas = $request['focusArea'];}
-                if(!empty($request['aboutme'])){ $model->about_user = $request['aboutme'];}
-                $model->user_type = $request['userType'];
-                $model->password = md5($request['password']);
-                $model->date_of_registration = date('Y-m-d H:i:s');
-                $model->created_date = date('Y-m-d H:i:s');
-                $model->modified_date = date('Y-m-d H:i:s');
-//          MD5 hash for admin@123 is : e6e061838856bf47e1de730719fb2609
-//          $model->user_token = md5(uniqid($model->user_id, true));
-                if ($model->save()) {
-                    $device = new DeviceLocation();
-                    $device->attributes = $request;
-                    if(isset($request['deviceId'])){
-                        $model->device_token = $request['deviceId'];
+        if(!empty($request)){
+            if(isset($request['registerType'])){
+                $registerType = strtolower($request['registerType']);
+                if(($registerType == "facebook" || $registerType == "google" || $registerType == "insta" || $registerType == "linkedin")){
+                    if(isset($request['userType'])){
+                        $userType = strtolower($request['userType']);
+                        if(($userType == "coach" || $userType == "user" )){
+                            if(!empty($request['fullname'])){
+                                if(!empty($request['email']) && !empty($request['password'])){
+                                    $model = new UserInfo();
+                                    $model->attributes = $request;
+                                    if(!empty($request['socialId'])) { $model->social_id = $request['socialId'];}
+                                    if(!empty($request['fullname'])) { $model->first_name = $request['fullname'];}
+                                    if(!empty($request['focusArea'])) { $model->focus_areas = $request['focusArea'];}
+                                    if(!empty($request['aboutme'])){ $model->about_user = $request['aboutme'];}
+                                    $model->user_type = $request['userType'];
+                                    $model->password = md5($request['password']);
+                                    $model->date_of_registration = date('Y-m-d H:i:s');
+                                    $model->created_date = date('Y-m-d H:i:s');
+                                    $model->modified_date = date('Y-m-d H:i:s');
+                                    //          MD5 hash for admin@123 is : e6e061838856bf47e1de730719fb2609
+                                    //          $model->user_token = md5(uniqid($model->user_id, true));
+                                    if ($model->save()) {
+                                        $device = new DeviceLocation();
+                                        $device->attributes = $request;
+                                        if(isset($request['deviceId'])){
+                                            $model->device_token = $request['deviceId'];
+                                        }
+                                        $device->event = "register";
+                                        $device->user_id = $model->user_id;
+                                        $device->created_date = date('Y-m-d H:i:s');
+                                        $device->modified_date = date('Y-m-d H:i:s');
+                                        $device->save();
+                                        $result = [
+                                            "code" => 200,
+                                            "message" => "success",
+                                            "userId" => $model->user_id,
+                                            //              "userToken" => $model->user_token,
+                                        ];
+                                    }else{
+                                        $result = [
+                                            "code" => 500,
+                                            "message" => "failed",
+                                            "errors" => [$model->errors],
+                                        ];
+                                    }
+
+                                }else{
+                                    $result = [
+                                        "code" => 500,
+                                        "message" => "failed",
+                                        "error" => "Invalid email or password",
+                                    ];
+                                }
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "failed",
+                                    "error" => "fullname cannot be blank",
+                                ];
+                            }
+
+                        }else{
+                            $result = [
+                                "code" => 500,
+                                "message" => "failed",
+                                "error" => "Invalid userType",
+                            ];
+                        }
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "error" => "userType not defined",
+                        ];
                     }
-                    $device->event = "register";
-                    $device->user_id = $model->user_id;
-                    $device->created_date = date('Y-m-d H:i:s');
-                    $device->modified_date = date('Y-m-d H:i:s');
-                    $device->save();
-                    $result = [
-                        "code" => 200,
-                        "message" => "success",
-                        "userId" => $model->user_id,
-//                "userToken" => $model->user_token,
-                    ];
-                } else {
+                }else{
                     $result = [
                         "code" => 500,
                         "message" => "failed",
-                        "errors" => [$model->errors],
+                        "error" => "Invalid registerType",
                     ];
                 }
+
             }else{
                 $result = [
                     "code" => 500,
                     "message" => "failed",
-                    "errors" => "registerType or userType or email or password or fullname are required",
+                    "error" => "registerType not defined",
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
                 "message" => "failed",
-                "errors" => "registerType or userType are required",
+                "error" => "data not available",
             ];
         }
-
         echo JSON::encode($result);
     }
 
@@ -110,66 +154,107 @@ class HomeController extends ActiveController
     {
         $result = [];
         $request = JSON::decode(Yii::$app->request->getRawBody());
+        if(!empty($request)){
+            if(isset($request['userType'])){
+                $userType = strtolower($request['userType']);
+                if(($userType == "coach") || ($userType == "user")){
+                    if(isset($request['deviceType'])){
+                        $deviceType = strtolower($request['deviceType']);
+                        if(($deviceType == "ios" )|| ($deviceType == "android")){
+                            if(!empty($request['deviceId'])){
+                                if (!empty($request['email']) && !empty($request['password'])) {
+                                    $user = UserInfo::findOne(["email" => $request['email'], "password" => md5($request['password'])]);
+                                    if (!empty($user)) {
+                                        $user->last_logged_in = date('Y-m-d H:i:s');
+                                        $user->save();
+                    //                    if($user->gender == 1){
+                    //                        $user->gender = "Female";
+                    //                    }else{
+                    //                        $user->gender = "male";
+                    //                    }
+                    //                    if($user->is_enabled == 1){
+                    //                        $user->is_enabled = "yes";
+                    //                    }else{
+                    //                        $user->is_enabled = "no";
+                    //                    }
+                                        $userDetails = [
+                                            "userId"=>$user['user_id'],
+                                            "userType"=>$user['user_type'],
+                                            "fullname"=>$user['first_name'].' '.$user['last_name'],
+                                            "email"=>$user['email'],
+                                            "gender"=> $user->gender,
+                                            "dob"=>$user->dob,
+                                            "aboutme"=>$user->about_user,
+                                            "goals"=>$user->goals,
+                                            "focus_area"=>$user->focus_areas,
+                                            "location"=>$user->location,
+                                            "city"=>$user->city,
+                                            "country"=>$user->country,
+                                            "profession"=>$user->profession,
+                                            "is_verified"=> $user->is_enabled,
+                                            "user_profile_image" => $user->image
+                                        ];
 
-        if (((!empty($request['userType'])) && ($request['userType'] == "coach") || ($request['userType'] == "user")) && (!empty($request['deviceId'])) && ($request['deviceType'] == "ios" )|| ($request['deviceType'] == "android")) {
-            if (!empty($request['email']) && !empty($request['password'])) {
-                $user = UserInfo::findOne(["email" => $request['email'], "password" => md5($request['password'])]);
-                if (!empty($user)) {
-                    $user->last_logged_in = date('Y-m-d H:i:s');
-                    $user->save();
-//                    if($user->gender == 1){
-//                        $user->gender = "Female";
-//                    }else{
-//                        $user->gender = "male";
-//                    }
-//                    if($user->is_enabled == 1){
-//                        $user->is_enabled = "yes";
-//                    }else{
-//                        $user->is_enabled = "no";
-//                    }
-                    $userDetails = [
-                        "userId"=>$user['user_id'],
-                        "userType"=>$user['user_type'],
-                        "fullname"=>$user['first_name'].' '.$user['last_name'],
-                        "email"=>$user['email'],
-                        "gender"=> $user->gender,
-                        "dob"=>$user->dob,
-                        "aboutme"=>$user->about_user,
-                        "goals"=>$user->goals,
-                        "focus_area"=>$user->focus_areas,
-                        "location"=>$user->location,
-                        "city"=>$user->city,
-                        "country"=>$user->country,
-                        "profession"=>$user->profession,
-                        "is_verified"=> $user->is_enabled,
-                        "user_profile_image" => $user->image
-                    ];
-
-                    $result = [
-                        "code" => 200,
-                        "status" => "success",
+                                        $result = [
+                                            "code" => 200,
+                                            "status" => "success",
 //                        "userToken"=>$user->user_token,
-                        "userDetails" => $userDetails,
-                    ];
-                } else {
+                                            "userDetails" => $userDetails,
+                                        ];
+                                    } else {
+                                        $result = [
+                                            "code" => 500,
+                                            "message" => "failed",
+                                            "error" => "Invalid user/Password",
+                                        ];
+                                    }
+                                } else {
+                                    $result = [
+                                        "code" => 500,
+                                        "message" => "failed",
+                                        "error" => "email and password required",
+                                    ];
+                                }
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "failed",
+                                    "error" => "deviceId not defined",
+                                ];
+                            }
+                        }else{
+                            $result = [
+                                "code" => 500,
+                                "message" => "failed",
+                                "error" => "Invalid deviceType",
+                            ];
+                        }
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "error" => "deviceType not defined",
+                        ];
+                    }
+                }else{
                     $result = [
                         "code" => 500,
                         "message" => "failed",
-                        "error" => "Invalid user/Password",
+                        "error" => "Invalid userType",
                     ];
                 }
-            } else {
+            }else{
                 $result = [
                     "code" => 500,
                     "message" => "failed",
-                    "error" => "email and password required",
+                    "error" => "userType not defined",
                 ];
             }
-        } else {
+        }else{
             $result = [
                 "code" => 500,
                 "message" => "failed",
-                "error" => "userType or deviceId or deviceType can not blank",
+                "error" => "data not available",
             ];
         }
         echo JSON::encode($result);
@@ -178,6 +263,120 @@ class HomeController extends ActiveController
     //Social Login Api As per Required Parameters.
 
     public function actionSocialLogin()
+    {
+        $result = [];
+        $request = JSON::decode(Yii::$app->request->getRawBody());
+        if(!empty($request)){
+            if(isset($request['loginType'])){
+//                ($request['loginType'] == "facebook" || $request['loginType'] == "google" || $request['loginType'] == "insta" || $request['loginType'] == "linkedin")
+                $loginType = strtolower($request['loginType']);
+                if(($loginType == "facebook") || ($loginType == "google") || ($loginType == "insta") || ($loginType == "linkedin")){
+                    if(isset($request['deviceType'])){
+                        $deviceType = strtolower($request['deviceType']);
+                        if(($deviceType == "ios" )|| ($deviceType == "android")){
+                            if(!empty($request['deviceId'])){
+                                if (!empty($request['email']) && !empty($request['socialId'])) {
+                                    $user = UserInfo::findOne(["email" => $request['email'], "social_id"=>$request['socialId']]);
+                                    if (!empty($user)) {
+                                        $user->last_logged_in = date('Y-m-d H:i:s');
+                                        $user->save();
+                                        //                    if($user->gender == 1){
+                                        //                        $user->gender = "Female";
+                                        //                    }else{
+                                        //                        $user->gender = "male";
+                                        //                    }
+                                        //                    if($user->is_enabled == 1){
+                                        //                        $user->is_enabled = "yes";
+                                        //                    }else{
+                                        //                        $user->is_enabled = "no";
+                                        //                    }
+                                        $userDetails = [
+                                            "userId"=>$user['user_id'],
+                                            "userType"=>$user['user_type'],
+                                            "fullname"=>$user['first_name'].' '.$user['last_name'],
+                                            "email"=>$user['email'],
+                                            "gender"=> $user->gender,
+                                            "dob"=>$user->dob,
+                                            "aboutme"=>$user->about_user,
+                                            "goals"=>$user->goals,
+                                            "focus_area"=>$user->focus_areas,
+                                            "location"=>$user->location,
+                                            "city"=>$user->city,
+                                            "country"=>$user->country,
+                                            "profession"=>$user->profession,
+                                            "is_verified"=> $user->is_enabled,
+                                            "user_profile_image" => $user->image
+                                        ];
+
+                                        $result = [
+                                            "code" => 200,
+                                            "status" => "success",
+//                        "userToken"=>$user->user_token,
+                                            "userDetails" => $userDetails,
+                                        ];
+                                    } else {
+                                        $result = [
+                                            "code" => 500,
+                                            "message" => "failed",
+                                            "error" => "Invalid user/socialId",
+                                        ];
+                                    }
+                                } else {
+                                    $result = [
+                                        "code" => 500,
+                                        "message" => "failed",
+                                        "error" => "email and password required",
+                                    ];
+                                }
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "failed",
+                                    "error" => "deviceId not defined",
+                                ];
+                            }
+                        }else{
+                            $result = [
+                                "code" => 500,
+                                "message" => "failed",
+                                "error" => "Invalid deviceType",
+                            ];
+                        }
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "error" => "deviceType not defined",
+                        ];
+                    }
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                        "error" => "Invalid loginType",
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "failed",
+                    "error" => "userType not defined",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "failed",
+                "error" => "data not available",
+            ];
+        }
+        echo JSON::encode($result);
+    }
+
+
+
+
+    public function actionSocialLoginbkp()
     {
         $result = [];
         $request = JSON::decode(Yii::$app->request->getRawBody());
@@ -255,45 +454,6 @@ class HomeController extends ActiveController
         echo JSON::encode($result);
     }
 
-    //register step -2 Api As per Required Parameters.
-
-    public function actionRegisterStep2()
-
-    {
-        $result = [];
-        $request = JSON::decode(Yii::$app->request->getRawBody());
-        if(!empty($request)){
-            $id = $request['id'];
-            $model = UserInfo::findOne($id);
-//        $model->attributes = $request;
-            $model->focus_areas = $request['focusArea'];
-            $model->about_user = $request['aboutMe'];
-            $model->goals = $request['goals'];
-            $model->location = $request['location'];
-            $model->profession = $request['working'];
-            $model->modified_date = date('Y-m-d H:i:s');
-            if ($model->save()) {
-                $result = [
-                    "code" => 200,
-                    "message" => "success",
-                    "userId" => $model->user_id,
-                    "userToken" => $model->user_token,
-                ];
-            } else {
-                $result = [
-                    "code" => 500,
-                    "message" => [$model->errors],
-                ];
-            }
-        }else{
-            $result = [
-                "code" => 500,
-                "message" => ["No Data Found"],
-            ];
-        }
-
-        echo JSON::encode($result);
-    }
 
     // update profile using id and update device location
 
@@ -396,7 +556,7 @@ class HomeController extends ActiveController
                     foreach ($image as $file){
                         $path = Yii::getAlias('@webroot').'/uploads/'.$file->name; //Generate your save file path here;
                         $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
-                        $model->image = $file->name;
+                        $model->image = $path;
                         if($model->save()){
                             $result = [
                                 "code" => 200,
