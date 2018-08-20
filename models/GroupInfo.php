@@ -13,7 +13,7 @@ use Yii;
  * @property string $group_description
  * @property string $group_image
  * @property string $group_category
- * @property string $likes_count
+ * @property int $likes_count
  * @property int $group_status
  * @property string $created_date
  * @property string $modified_date
@@ -39,11 +39,10 @@ class GroupInfo extends \yii\db\ActiveRecord
     {
         return [
             [['user_id', 'group_name', 'created_date', 'modified_date'], 'required'],
-            [['user_id', 'group_status'], 'integer'],
+            [['user_id', 'likes_count', 'group_status'], 'integer'],
             [['created_date', 'modified_date'], 'safe'],
             [['group_name', 'group_category'], 'string', 'max' => 50],
             [['group_description', 'group_image'], 'string', 'max' => 100],
-            [['likes_count'], 'string', 'max' => 11],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserInfo::className(), 'targetAttribute' => ['user_id' => 'user_id']],
         ];
     }
