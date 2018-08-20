@@ -156,10 +156,22 @@ class PostController extends ActiveController
                             }
                         }else{
                             if($likeuser->delete()){
-                                $result = [
-                                    "code" => 200,
-                                    "message" => "Disliked Successfully",
-                                ];
+                                $Posts = Posts::find()->where(['post_id'=>$post_id])->one();
+                                if(empty($Posts->likes_count)){ $likes = 0; }else{$likes = $Posts->likes_count;}
+                                $Posts->likes_count = $likes - 1;
+                                if($Posts->save()){
+                                    $result = [
+                                        "code" => 200,
+                                        "message" => "Disliked Successfully",
+                                    ];
+                                }else{
+                                    $result = [
+                                        "code" => 500,
+                                        "message" => "failed",
+                                        "error"=> [$Posts->errors],
+                                    ];
+                                }
+
                             }else{
                                 $result = [
                                     "code" => 500,
@@ -223,10 +235,20 @@ class PostController extends ActiveController
                         $model->created_date = date('Y-m-d H:i:s');
                         $model->modified_date = date('Y-m-d H:i:s');
                         if($model->save()){
-                            $result = [
-                                "code" => 200,
-                                "message" => "success",
-                            ];
+                            if(empty($post->comment_count)){ $likes = 0; }else{$likes = $post->comment_count;}
+                            $post->comment_count = $likes + 1;
+                            if($post->save()){
+                                $result = [
+                                    "code" => 200,
+                                    "message" => "success",
+                                ];
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "failed",
+                                    "error"=> [$post->errors],
+                                ];
+                            }
                         }else{
                             $result = [
                                 "code" => 500,
@@ -349,28 +371,46 @@ class PostController extends ActiveController
             if(!empty($model)){
                 $request = JSON::decode(Yii::$app->request->getRawBody());
                 $post_id = $request['post_id'];
-                $likeuser = Likes::find()->where(['post_id'=>$post_id])->all();
-                if(!empty($likeuser)){
-                    $likesList = [];
-                    foreach ($likeuser as $likes){
-                        $model = UserInfo::findOne(["user_id" => $likes['user_id']]);
-                        array_push($likesList,array(
-                            "userName"=>$model['first_name'].' '.$model['last_name'],
-                            "imageUrl"=>$model['image'],
-                            "about"=>$model['about_user']
-                        ));
-                    }
+                if(!empty($post_id)){
+                    $post = Posts::findOne($post_id);
+                    if($post){
+                        $likeuser = Likes::find()->where(['post_id'=>$post_id])->all();
+                        if(!empty($likeuser)){
+                            $likesList = [];
+                            foreach ($likeuser as $likes){
+                                $model = UserInfo::findOne(["user_id" => $likes['user_id']]);
+                                array_push($likesList,array(
+                                    "userName"=>$model['first_name'].' '.$model['last_name'],
+                                    "imageUrl"=>$model['image'],
+                                    "about"=>$model['about_user']
+                                ));
+                            }
 //                    echo "<pre>";
 //                    print_r($likesList);die;
-                    $result = [
-                        "code" => 200,
-                        "message" => "success",
-                        "list"=>$likesList,
-                    ];
+                            $result = [
+                                "code" => 200,
+                                "message" => "success",
+                                "list"=>$likesList,
+                            ];
+                        }else{
+                            $result = [
+                                "code" => 200,
+                                "message"=>"success",
+                                "likes" => "no likes available",
+                            ];
+                        }
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "error"=> "post not found",
+                        ];
+                    }
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "no likes available",
+                        "message" => "failed",
+                        "error"=> "post id can not blank",
                     ];
                 }
             }else{

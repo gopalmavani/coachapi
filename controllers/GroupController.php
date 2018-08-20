@@ -147,9 +147,9 @@ class GroupController extends ActiveController
                     ];
                 }else{
                     $result = [
-                        "code" => 500,
-                        "message" => "failed",
-                        "errors" => "no data",
+                        "code" => 200,
+                        "message" => "success",
+                        "groupData" => "no group created",
                     ];
                 }
             }else{
