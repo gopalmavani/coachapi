@@ -6,8 +6,10 @@
  * Time: 5:20 PM
  */
 use app\assets\AppAsset;
+use yii\helpers\Html;
 AppAsset::register($this);
 ?>
+<?= Html::csrfMetaTags() ?>
 <?php $this->beginPage() ?>
 <?php $this->head() ?>
 <?php $this->beginBody() ?>

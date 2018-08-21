@@ -23,8 +23,11 @@ class AppAsset extends AssetBundle
         'css/site.css',
         'css/bootstrap.min.css',
         'css/form.css',
+        'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'
     ];
     public $js = [
+        '//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+        'http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js'
     ];
     public $depends = [
         'yii\web\YiiAsset',

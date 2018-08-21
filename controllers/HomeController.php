@@ -20,6 +20,7 @@ use app\models\Users;
 use app\models\UserInfo;
 use app\models\DeviceLocation;
 use yii\web\UploadedFile;
+use yii\helpers\Url;
 
 class HomeController extends ActiveController
 {
@@ -720,21 +721,22 @@ class HomeController extends ActiveController
     {
         $result = [];
         $request = JSON::decode(Yii::$app->request->getRawBody());
-        if (!empty($request['email'])) {
-            $user = UserInfo::findOne(["email" => $request['email']]);
+        if (!empty($request['emailId'])) {
+            $user = UserInfo::findOne(["email" => $request['emailId']]);
             if (!empty($user)) {
                 $to = $user['email'];
                 $subject = "user password reset";
                 $headers = "MIME-Version: 1.0" . "\r\n";
                 $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
                 $headers .= "From: support@coach.in" . "\r\n" .
-                $url = Yii::$app->urlManager->createUrl("users/reset-password");
-                    $message = "<html>
+                $url = Yii::$app->urlManager->createUrl("users/resetpassword/".$user['user_id']);
+                $message = "
+                        <html>
                             <body>
                                 <table style='border:5px solid #f1f1f1;margin:50px auto;width:500px;'>
                                     <tbody>
                                         <tr width='100%'> 
-                                           password reset link <a href='<?php echo ?>'>click here</a>
+                                           password reset link <a href='<?php echo $url; ?>'>click here</a>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -760,8 +762,10 @@ class HomeController extends ActiveController
         }else{
             $result = [
                 "code" => 500,
-                "message" => "user id not available",
+                "message" => "user not available",
             ];
         }
+        echo JSON::encode($result);
     }
+
 }
