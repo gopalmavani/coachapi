@@ -730,18 +730,19 @@ class HomeController extends ActiveController
                 $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
                 $headers .= "From: support@coach.in" . "\r\n" .
                 $url = Yii::$app->urlManager->createUrl("users/resetpassword/".$user['user_id']);
-                $message = "
-                        <html>
-                            <body>
-                                <table style='margin:50px auto;width:500px;'>
-                                    <tbody>
-                                        <tr width='100%'> 
-                                           <td> password reset link <a href='<?php echo $url; ?>'>click here</a></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </body>
-                        </html>";
+                $message = "password reset link <a href='<?php echo $url; ?>'>click here</a>";
+//                $message = "
+//                        <html>
+//                            <body>
+//                                <table style='margin:50px auto;width:500px;'>
+//                                    <tbody>
+//                                        <tr width='100%'>
+//                                           <td> password reset link <a href=''>click here</a></td>
+//                                        </tr>
+//                                    </tbody>
+//                                </table>
+//                            </body>
+//                        </html>";
                 if(mail($to, $subject, $message, $headers)){
                     $result = [
                         "code" => 200,
