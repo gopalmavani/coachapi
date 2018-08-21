@@ -811,7 +811,7 @@ class HomeController extends ActiveController
                         $result = [
                             "code" => 500,
                             "message"=>"failed",
-                            "error" => "seachKey can not blank",
+                            "error" => "searchKey can not blank",
                         ];
                     }
 
@@ -819,7 +819,7 @@ class HomeController extends ActiveController
                     $result = [
                         "code" => 500,
                         "message"=>"failed",
-                        "error" => "seachKey can not blank",
+                        "error" => "searchKey cannot blank",
                     ];
                 }
             }else{

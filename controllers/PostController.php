@@ -66,7 +66,6 @@ class PostController extends ActiveController
                                 $media->url = $path;
                                 $media->created_date = date('Y-m-d H:i:s');
                                 $media->modified_date = date('Y-m-d H:i:s');
-                                $media->save();
                                 if($media->save()){
                                     $result = [
                                         "code" => 200,
