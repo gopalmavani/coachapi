@@ -2,11 +2,14 @@
 
 namespace app\controllers;
 
+use app\models\UserInfo;
 use Yii;
 use app\models\Users;
 use app\models\UsersSearch;
+use yii\helpers\Json;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+
 use yii\filters\VerbFilter;
 
 /**
@@ -27,6 +30,12 @@ class UsersController extends Controller
                 ],
             ],
         ];
+    }
+
+    public function beforeAction($action)
+    {
+        $this->enableCsrfValidation = false;
+        return parent::beforeAction($action);
     }
 
     /**
@@ -52,6 +61,7 @@ class UsersController extends Controller
      */
     public function actionView($id)
     {
+
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
@@ -112,12 +122,62 @@ class UsersController extends Controller
     public function actionResetpassword($id)
     {
         $this->layout = 'forget_password';
-        if(isset($_POST['password'])){
-            echo "hi";die;
-        }
         return $this->render('resetpassword', [
-
+            'id'=>$id,
         ]);
+    }
+
+    public function actionChangepassword($id)
+    {
+        if($id){
+            $users = UserInfo::findOne($id);
+            if($users){
+                if($_POST['password']){
+                    $password = md5($_POST['password']);
+                    if($users->password == $password){
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "error"=> "password same as privious one",
+                        ];
+                    }else{
+                        $users->password = $password;
+                        if($users->save()){
+                            $result = [
+                                "code" => 200,
+                                "message" => "success",
+                                "token"=> "1",
+                            ];
+                        }else{
+                            $result = [
+                                "code" => 200,
+                                "message" => "failed",
+                                "error"=> $users->errors,
+                            ];
+                        }
+                    }
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                        "error"=> "password blank"
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "failed",
+                    "error"=> "user not found"
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "failed",
+                "error"=> "user id not found"
+            ];
+        }
+        echo JSON::encode($result);
     }
 
 

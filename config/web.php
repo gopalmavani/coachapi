@@ -78,7 +78,8 @@ $config = [
                 'commentPost'=>'post/comment',
                 'postList'=>'post/list',
                 'likeList'=>'post/like-list',
-                'deactivateAccount'=>'home/deactive-account'
+                'deactivateAccount'=>'home/deactive-account',
+                'forgotPassword'=>'home/forget-password'
 
             ],
         ],
