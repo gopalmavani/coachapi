@@ -733,10 +733,10 @@ class HomeController extends ActiveController
                 $message = "
                         <html>
                             <body>
-                                <table style='border:5px solid #f1f1f1;margin:50px auto;width:500px;'>
+                                <table style='margin:50px auto;width:500px;'>
                                     <tbody>
                                         <tr width='100%'> 
-                                           password reset link <a href='<?php echo $url; ?>'>click here</a>
+                                           <td> password reset link <a href='<?php echo $url; ?>'>click here</a></td>
                                         </tr>
                                     </tbody>
                                 </table>
