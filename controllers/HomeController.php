@@ -51,7 +51,7 @@ class HomeController extends ActiveController
         if(!empty($request)){
             if(isset($request['registerType'])){
                 $registerType = strtolower($request['registerType']);
-                if(($registerType == "facebook" || $registerType == "google" || $registerType == "insta" || $registerType == "linkedin")){
+                if(($registerType == "facebook" || $registerType == "email" || $registerType == "google" || $registerType == "insta" || $registerType == "linkedin")){
                     if(isset($request['userType'])){
                         $userType = strtolower($request['userType']);
                         if(($userType == "coach" || $userType == "user" )){
@@ -270,7 +270,7 @@ class HomeController extends ActiveController
             if(isset($request['loginType'])){
 //                ($request['loginType'] == "facebook" || $request['loginType'] == "google" || $request['loginType'] == "insta" || $request['loginType'] == "linkedin")
                 $loginType = strtolower($request['loginType']);
-                if(($loginType == "facebook") || ($loginType == "google") || ($loginType == "insta") || ($loginType == "linkedin")){
+                if(($loginType == "facebook") || ($loginType == "email") || ($loginType == "google") || ($loginType == "insta") || ($loginType == "linkedin")){
                     if(isset($request['deviceType'])){
                         $deviceType = strtolower($request['deviceType']);
                         if(($deviceType == "ios" )|| ($deviceType == "android")){
