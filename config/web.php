@@ -79,7 +79,8 @@ $config = [
                 'postList'=>'post/list',
                 'likeList'=>'post/like-list',
                 'deactivateAccount'=>'home/deactive-account',
-                'forgotPassword'=>'home/forget-password'
+                'forgotPassword'=>'home/forget-password',
+                'search' => 'home/search'
 
             ],
         ],
