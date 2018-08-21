@@ -723,7 +723,7 @@ class HomeController extends ActiveController
         $request = JSON::decode(Yii::$app->request->getRawBody());
         if (!empty($request['emailId'])) {
             $user = UserInfo::findOne(["email" => $request['emailId']]);
-            $url = "http://scrumwheel.com/".Yii::$app->urlManager->createUrl("users/resetpassword/".$user["user_id"]);
+            $url = "http://scrumwheel.com".Yii::$app->urlManager->createUrl("users/resetpassword/".$user["user_id"]);
 
             if (!empty($user)) {
                 $to = $user['email'];
