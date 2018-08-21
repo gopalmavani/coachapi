@@ -730,7 +730,7 @@ class HomeController extends ActiveController
                 $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
                 $headers .= "From: support@coach.in" . "\r\n" .
                 $url = Yii::$app->urlManager->createUrl("users/resetpassword/".$user['user_id']);
-                $message = "password reset link <a href='<?php echo $url; ?>'>click here</a>";
+                $message = '<div>password reset link <a href='.$url.' target="_blank">click here</a></div>';
 //                $message = "
 //                        <html>
 //                            <body>
