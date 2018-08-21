@@ -776,4 +776,66 @@ class HomeController extends ActiveController
         echo JSON::encode($result);
     }
 
+    //search api from user name parameters
+
+    public function actionSearch()
+    {
+        $result = [];
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $user = UserInfo::findOne(["user_id" => $user_id]);
+            if(!empty($user)){
+                $request = JSON::decode(Yii::$app->request->getRawBody());
+                if(!empty($request['seachKey'])){
+                    $userData = UserInfo::find()->select(['user_id','first_name','image','location','city','country','about_user'])->where(["like","first_name" ,$request['seachKey']])->all();
+                    if($userData){
+                        $data = [];
+                        foreach ($userData as $usersInfo){
+                            array_push($data,array(
+                                "userId"=>$usersInfo['user_id'],
+                                "userName"=>$usersInfo['first_name'],
+                                "userImage"=>$usersInfo['image'],
+                                "location"=>$usersInfo['location'],
+                                "city"=>$usersInfo['city'],
+                                "country"=>$usersInfo['country'],
+                                "aboutme"=>$usersInfo['about_user']
+                            ));
+                        }
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                            "userData"=>$data
+                        ];
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message"=>"failed",
+                            "error" => "seachKey can not blank",
+                        ];
+                    }
+
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message"=>"failed",
+                        "error" => "seachKey can not blank",
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message"=>"failed",
+                    "error" => "user not found",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message"=>"failed",
+                "error" => "user id can not blank",
+            ];
+        }
+        echo JSON::encode($result);
+    }
 }
