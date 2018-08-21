@@ -42,8 +42,9 @@ class Posts extends \yii\db\ActiveRecord
         return [
             [['user_id', 'post_type', 'created_date', 'modified_date'], 'required'],
             [['user_id', 'post_status', 'likes_count', 'comment_count'], 'integer'],
+            [['post_description'], 'string'],
             [['created_date', 'modified_date'], 'safe'],
-            [['post_title', 'post_subtitle', 'post_description'], 'string', 'max' => 50],
+            [['post_title', 'post_subtitle'], 'string', 'max' => 50],
             [['post_type'], 'string', 'max' => 20],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserInfo::className(), 'targetAttribute' => ['user_id' => 'user_id']],
         ];
