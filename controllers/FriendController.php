@@ -51,7 +51,8 @@ class FriendController extends ActiveController
                     "fullname"=>$value['first_name'],
                     "email"=>$value['email'],
                     "location"=>$value['location'],
-                    "aboutme"=>$value['about_user']
+                    "aboutme"=>$value['about_user'],
+                    "user_profile_image" => $value['image']
                 ];
                 array_push($userDetails,$users);
             }
@@ -81,7 +82,7 @@ class FriendController extends ActiveController
             $users =  UserInfo::findOne($user_id);
             if($users){
                 $request = JSON::decode(Yii::$app->request->getRawBody());
-                $request_id = $request['friend_request_id'];
+                $request_id = $request['friend_user_id'];
                 if(!empty($request_id)){
                     $friend = FriendsList::findOne(["friend_user_id"=>$request_id,"user_id"=>$user_id]);
                     $user = UserInfo::findOne(["user_id"=>$request_id]);
@@ -147,8 +148,8 @@ class FriendController extends ActiveController
             $users =  UserInfo::findOne($user_id);
             if($users){
                 $request = JSON::decode(Yii::$app->request->getRawBody());
-                if(isset($request['friend_list_id']) && $request['status'] ){
-                    $response_id = $request['friend_list_id'];
+                if(isset($request['friend_request_id']) && $request['status'] ){
+                    $response_id = $request['friend_request_id'];
                     $friend = FriendsList::findOne(["friend_list_id"=>$response_id,"friend_user_id"=>$user_id]);
                     if(!empty($friend)){
                         $friend->status = $request['status'];
