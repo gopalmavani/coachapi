@@ -723,26 +723,33 @@ class HomeController extends ActiveController
         $request = JSON::decode(Yii::$app->request->getRawBody());
         if (!empty($request['emailId'])) {
             $user = UserInfo::findOne(["email" => $request['emailId']]);
+            $url = "http://scrumwheel.com/".Yii::$app->urlManager->createUrl("users/resetpassword/".$user["user_id"]);
+
             if (!empty($user)) {
                 $to = $user['email'];
                 $subject = "user password reset";
                 $headers = "MIME-Version: 1.0" . "\r\n";
                 $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-                $headers .= "From: support@coach.in" . "\r\n" .
-                $url = Yii::$app->urlManager->createUrl("users/resetpassword/".$user['user_id']);
-                $message = '<div>password reset link <a href='.$url.' target="_blank">click here</a></div>';
-//                $message = "
-//                        <html>
-//                            <body>
-//                                <table style='margin:50px auto;width:500px;'>
-//                                    <tbody>
-//                                        <tr width='100%'>
-//                                           <td> password reset link <a href=''>click here</a></td>
-//                                        </tr>
-//                                    </tbody>
-//                                </table>
-//                            </body>
-//                        </html>";
+                $headers .= "From: support@coach.in" . "\r\n";
+                $message = '
+                        <html>
+                            <body>
+                                <table style="margin:50px auto;width:500px;">
+                                    <thead>
+                                        <tr>
+                                            <td><h2>CoachApi</h2></td>
+                                        </tr>
+                                        <tr><p>Reset password Details</p></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr width="100%">
+                                           <td><h4>password reset link <a href="'.$url.'" target="_blank">click here</a></h4></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </body>
+                        </html>';
+
                 if(mail($to, $subject, $message, $headers)){
                     $result = [
                         "code" => 200,
