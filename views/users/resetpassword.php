@@ -31,6 +31,7 @@
             <div class="row">
                 Confirm Password <input type="password" name="pass2" id="pass2" class="form-control">
             </div>
+                <span id="samepassword" style="color: red;display: none;">Password is same as old Password.</span>
             <br>
             <div class="row">
                 <input type="submit" class="btn btn-primary form-control" value="submit" name="submit">
@@ -82,7 +83,13 @@
                             if (Result.token == 1) {
                                 $("#pass-row").hide();
                                 $("#success-pass").show();
+                                $("#samepassword").hide();
+                            }else if(Result.token == 2){
+                                $("#samepassword").show();
+                                $("#pass-row").show();
+                                $("#success-pass").hide();
                             }else{
+                                $("#samepassword").hide();
                                 $("#pass-row").show();
                                 $("#success-pass").hide();
                             }

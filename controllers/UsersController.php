@@ -138,6 +138,7 @@ class UsersController extends Controller
                         $result = [
                             "code" => 500,
                             "message" => "failed",
+                            "token"=> "2",
                             "error"=> "password same as privious one",
                         ];
                     }else{
