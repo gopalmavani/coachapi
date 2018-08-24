@@ -138,7 +138,7 @@ class GroupController extends ActiveController
                         $model = GroupInfo::find()->select(['group_name','group_id','group_image','user_id'])->where(['group_id'=>$user->group_id])->one();
                         $countuser = GroupMapping::findAll(['group_id'=>$user->group_id]);
                         $countuser = count($countuser);
-                        array_push($data,["group_id"=>$model->group_id,"group_name"=>$model->group_name,"no_of_user"=>$countuser,"group_image"=>$model->group_image,'created_by'=>$model->user_id]);
+                        array_push($data,["groupId"=>$model->group_id,"groupName"=>$model->group_name,"noOfMember"=>$countuser,"imageUrl"=>$model->group_image,'created_by'=>$model->user_id]);
                     };
                     $result = [
                         "code" => 200,
