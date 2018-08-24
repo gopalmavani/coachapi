@@ -54,7 +54,10 @@ class FriendController extends ActiveController
                     $connection = Yii::$app->getDb();
                     //example sql
                     // SELECT device_id,user_id, ( 3959 * acos( cos( radians(23.0168) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(72.5003) ) + sin( radians(23.0168) ) * sin( radians( latitude ) ) ) ) AS distance FROM device_location HAVING distance < 25 ORDER BY distance LIMIT 0 , 20;
-                    $command = $connection->createCommand("SELECT user_id, ( 3959 * acos( cos( radians($latitude) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians($longitude) ) + sin( radians($latitude) ) * sin( radians( latitude ) ) ) ) AS distance FROM device_location HAVING distance < 5 ORDER BY distance");
+                    // there are distance in miles so .
+                    // 1 kilometer is equal to 0.62137119 miles .
+                    // so  5 kilometer is equal to 3.1068559612 miles .
+                    $command = $connection->createCommand("SELECT user_id, ( 3959 * acos( cos( radians($latitude) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians($longitude) ) + sin( radians($latitude) ) * sin( radians( latitude ) ) ) ) AS distance FROM device_location HAVING distance < 3.1068559612 ORDER BY distance");
                     $result = $command->queryAll();
                     if(!empty($result)){
                         $SuggestedFriends = [];
@@ -81,7 +84,7 @@ class FriendController extends ActiveController
                         $result = [
                             "code" => 200,
                             "message" => "success",
-                            "userData" => "no frnds near you"
+                            "userData" => "no Suggested Friends near you"
                         ];
                     }
                 }else{
@@ -105,8 +108,6 @@ class FriendController extends ActiveController
                 "error"=> "user id can not blank"
             ];
         }
-
-
         echo JSON::encode($result);
     }
 
