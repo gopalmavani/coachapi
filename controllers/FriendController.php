@@ -42,30 +42,70 @@ class FriendController extends ActiveController
     public function actionSuggestedFriendList()
     {
         $result = [];
-        $model = UserInfo::find()->select(['user_id','first_name','email','location','image','about_user'])->All();
-        if(!empty($model)) {
-            $userDetails=[];
-            foreach ($model as $value){
-                $users =[
-                    "user_id"=>$value['user_id'],
-                    "fullname"=>$value['first_name'],
-                    "email"=>$value['email'],
-                    "location"=>$value['location'],
-                    "aboutme"=>$value['about_user'],
-                    "user_profile_image" => $value['image']
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $users =  UserInfo::findOne($user_id);
+            if($users) {
+                $request = JSON::decode(Yii::$app->request->getRawBody());
+                if(!empty($request['latitude']) && !empty($request['longitude'])){
+                    $latitude = $request['latitude'];
+                    $longitude = $request['longitude'];
+                    $connection = Yii::$app->getDb();
+                    //example sql
+                    // SELECT device_id,user_id, ( 3959 * acos( cos( radians(23.0168) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(72.5003) ) + sin( radians(23.0168) ) * sin( radians( latitude ) ) ) ) AS distance FROM device_location HAVING distance < 25 ORDER BY distance LIMIT 0 , 20;
+                    // there are distance in miles so .
+                    // 1 kilometer is equal to 0.62137119 miles .
+                    // so  5 kilometer is equal to 3.1068559612 miles .
+                    $command = $connection->createCommand("SELECT user_id, ( 3959 * acos( cos( radians($latitude) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians($longitude) ) + sin( radians($latitude) ) * sin( radians( latitude ) ) ) ) AS distance FROM device_location HAVING distance < 3.1068559612 ORDER BY distance");
+                    $result = $command->queryAll();
+                    if(!empty($result)){
+                        $SuggestedFriends = [];
+                        foreach ($result as $userSuggest){
+                            $model = UserInfo::findOne($userSuggest['user_id']);
+                            if($model['user_id'] == $user_id){
+                            }else{
+                                array_push($SuggestedFriends,array(
+                                    "user_id "=> $model['user_id'],
+                                    "fullname" => $model['first_name'],
+                                    "email" => $model['email'],
+                                    "location" => $model['location'],
+                                    "aboutme" => $model['about_user'],
+                                    "user_profile_image" => $model['image']
+                                ));
+                            }
+                        }
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                            "userData" => $SuggestedFriends,
+                        ];
+                    }else{
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                            "userData" => "no Suggested Friends near you"
+                        ];
+                    }
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                        "error"=> "latitude or longtitude can not blank"
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "failed",
+                    "error"=> "user not found"
                 ];
-                array_push($userDetails,$users);
             }
-
-            $result = [
-                "code" => 200,
-                "message" => "success",
-                "userData" => $userDetails,
-            ];
         }else{
             $result = [
                 "code" => 500,
                 "message" => "failed",
+                "error"=> "user id can not blank"
             ];
         }
         echo JSON::encode($result);
