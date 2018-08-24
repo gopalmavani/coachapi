@@ -43,6 +43,7 @@ class PostController extends ActiveController
 
     public function actionCreatePost(){
         $result = [];
+
         $data = Yii::$app->request->post();
         $headers = Yii::$app->request->headers;
         $user_id = $headers['user_id'];
