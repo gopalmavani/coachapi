@@ -292,7 +292,6 @@ class PostController extends ActiveController
         echo JSON::encode($result);
     }
 
-
     //comment post
 
     public function actionComment()
@@ -449,8 +448,8 @@ class PostController extends ActiveController
             $model = UserInfo::findOne(["user_id" => $user_id]);
             if(!empty($model)){
                 $request = JSON::decode(Yii::$app->request->getRawBody());
-                $post_id = $request['post_id'];
-                if(!empty($post_id)){
+                if(isset($request['post_id'])){
+                    $post_id = $request['post_id'];
                     $post = Posts::findOne($post_id);
                     if($post){
                         $likeuser = Likes::find()->where(['post_id'=>$post_id])->all();
@@ -485,11 +484,45 @@ class PostController extends ActiveController
                             "error"=> "post not found",
                         ];
                     }
+                }elseif (isset($request['group_id'])){
+                    $group_id = $request['group_id'];
+                    $group = GroupInfo::findOne($group_id);
+                    if($group){
+                        $groupLike = GroupLikes::find()->where(['group_id'=>$group_id])->all();
+                        if($groupLike){
+                            $likesList = [];
+                            foreach ($groupLike as $likes){
+                                $model = UserInfo::findOne(["user_id" => $likes['user_id']]);
+                                array_push($likesList,array(
+                                    "userName"=>$model['first_name'],
+                                    "imageUrl"=>$model['image'],
+                                    "about"=>$model['about_user']
+                                ));
+                            }
+                            $result = [
+                                "code" => 200,
+                                "message" => "success",
+                                "list"=>$likesList,
+                            ];
+                        }else{
+                            $result = [
+                                "code" => 200,
+                                "message"=>"success",
+                                "likes" => "no likes available",
+                            ];
+                        }
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "error"=> "group not found",
+                        ];
+                    }
                 }else{
                     $result = [
                         "code" => 500,
                         "message" => "failed",
-                        "error"=> "post id can not blank",
+                        "error"=> "post id or group id can not blank",
                     ];
                 }
             }else{
