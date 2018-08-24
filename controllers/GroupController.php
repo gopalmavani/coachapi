@@ -131,14 +131,14 @@ class GroupController extends ActiveController
         if(!empty($user_id)) {
             $users = UserInfo::findOne($user_id);
             if ($users) {
-                $model = GroupInfo::find()->select(['group_name','group_id','group_image','user_id'])->where(['user_id'=>$user_id])->All();
+                $groupsmapp = GroupMapping::find('group_id')->where(['user_id'=>$user_id])->All();
                 $data = [];
-                if(!empty($model)){
-                    foreach ($model as $user){
-
+                if(!empty($groupsmapp)){
+                    foreach ($groupsmapp as $user){
+                        $model = GroupInfo::find()->select(['group_name','group_id','group_image','user_id'])->where(['group_id'=>$user->group_id])->one();
                         $countuser = GroupMapping::findAll(['group_id'=>$user->group_id]);
                         $countuser = count($countuser);
-                        array_push($data,["group_id"=>$user->group_id,"group_name"=>$user->group_name,"no_of_user"=>$countuser,"group_image"=>$user->group_image,'created_by'=>$user->user_id]);
+                        array_push($data,["group_id"=>$model->group_id,"group_name"=>$model->group_name,"no_of_user"=>$countuser,"group_image"=>$model->group_image,'created_by'=>$model->user_id]);
                     };
                     $result = [
                         "code" => 200,
@@ -174,6 +174,57 @@ class GroupController extends ActiveController
 
     public function actionGroupDetail()
     {
+        $result = [];
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)) {
+            $users = UserInfo::findOne($user_id);
+            if ($users) {
+                $request = JSON::decode(Yii::$app->request->getRawBody());
+                $group_id = $request['group_id'];
+                if(!empty($group_id)){
+                    $group = GroupInfo::findOne($group_id);
+                    if ($group) {
+                        $groupData = [
+                            "groupId" => $group->group_id,
+                            "groupName" => $group->group_name,
+                            "groupImage" => $group->group_image,
+                            "posts"=>[],
+                        ];
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                            "groupData"=>$groupData
+                        ];
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "failed",
+                            "error"=> "group not found"
+                        ];
+                    }
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                        "error"=> "group id can not blank"
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "failed",
+                    "error"=> "user not found"
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "failed",
+                "error"=> "user id can not blank"
+            ];
+        }
+        echo JSON::encode($result);
 //        $model = GroupInfo::find()->select(['group_name','group_id','group_image'])->All();
 //        $data = [];
 //        if(!empty($model)){
@@ -193,7 +244,7 @@ class GroupController extends ActiveController
 //                "message" => "no data",
 //            ];
 //        }
-//        echo JSON::encode($result);
+//
     }
 
     //add member to group
@@ -360,7 +411,5 @@ class GroupController extends ActiveController
         }
         echo JSON::encode($result);
     }
-
-
 
 }
