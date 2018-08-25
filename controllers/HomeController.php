@@ -787,8 +787,8 @@ class HomeController extends ActiveController
             $user = UserInfo::findOne(["user_id" => $user_id]);
             if(!empty($user)){
                 $request = JSON::decode(Yii::$app->request->getRawBody());
-                if(!empty($request['seachKey'])){
-                    $userData = UserInfo::find()->select(['user_id','first_name','image','location','city','country','about_user'])->where(["like","first_name" ,$request['seachKey']])->all();
+                if(!empty($request['searchKey'])){
+                    $userData = UserInfo::find()->select(['user_id','first_name','image','location','city','country','about_user'])->where(["like","first_name" ,$request['searchKey']])->all();
                     if($userData){
                         $data = [];
                         foreach ($userData as $usersInfo){
