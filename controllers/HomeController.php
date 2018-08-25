@@ -326,7 +326,7 @@ class HomeController extends ActiveController
                                     $result = [
                                         "code" => 500,
                                         "message" => "failed",
-                                        "error" => "email and password required",
+                                        "error" => "email and socialId required",
                                     ];
                                 }
                             }else{
