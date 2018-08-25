@@ -1,5 +1,6 @@
 <?php
 namespace app\controllers;
+use app\models\Posts;
 use Yii;
 use yii\web\Controller;
 use  yii\web\Request;
@@ -185,11 +186,11 @@ class GroupController extends ActiveController
                 if(!empty($group_id)){
                     $group = GroupInfo::findOne($group_id);
                     if ($group) {
+//                        $posts = Posts::find()->select([])->where(['user_id'=>$user_id])->all();
                         $groupData = [
                             "groupId" => $group->group_id,
                             "groupName" => $group->group_name,
                             "groupImage" => $group->group_image,
-                            "posts"=>[],
                         ];
                         $result = [
                             "code" => 200,
