@@ -16,7 +16,7 @@ use app\models\UserInfo;
 use app\models\GroupMapping;
 use app\models\DeviceLocation;
 use yii\web\UploadedFile;
-
+use yii\data\Pagination;
 
 class GroupController extends ActiveController
 {
@@ -193,7 +193,7 @@ class GroupController extends ActiveController
                 }if (isset($request['limit'])){
                     $limit = $request['limit'];
                 }else{
-                    $limit = 10;
+                    $limit = 100;
                 }
                 if(!empty($group_id)){
                     $group = GroupInfo::findOne($group_id);
@@ -202,7 +202,7 @@ class GroupController extends ActiveController
                         $postData = [];
                         if($groupUsers){
                             foreach ($groupUsers as $GroupUser){
-//                                $posts = Posts::find()->where(['user_id'=>$GroupUser['user_id']])->all();
+                                $query = Posts::find()->where(['user_id'=>$GroupUser['user_id']])->all();
                                 $posts = (new \yii\db\Query())
                                     ->select('*')
                                     ->from('posts')
