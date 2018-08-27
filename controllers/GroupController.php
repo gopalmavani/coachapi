@@ -185,6 +185,16 @@ class GroupController extends ActiveController
             if ($users) {
                 $request = JSON::decode(Yii::$app->request->getRawBody());
                 $group_id = $request['group_id'];
+
+                if(isset($request['offset'])){
+                    $offset =  $request['offset'];
+                }else{
+                    $offset = 0;
+                }if (isset($request['limit'])){
+                    $limit = $request['limit'];
+                }else{
+                    $limit = 10;
+                }
                 if(!empty($group_id)){
                     $group = GroupInfo::findOne($group_id);
                     if ($group) {
@@ -192,7 +202,14 @@ class GroupController extends ActiveController
                         $postData = [];
                         if($groupUsers){
                             foreach ($groupUsers as $GroupUser){
-                                $posts = Posts::find()->where(['user_id'=>$GroupUser['user_id']])->all();
+//                                $posts = Posts::find()->where(['user_id'=>$GroupUser['user_id']])->all();
+                                $posts = (new \yii\db\Query())
+                                    ->select('*')
+                                    ->from('posts')
+                                    ->where(['user_id'=>$GroupUser['user_id']])
+                                    ->limit($limit)
+                                    ->offset($offset)
+                                    ->all();
 
                                 if($posts){
                                     foreach ($posts as $post){
