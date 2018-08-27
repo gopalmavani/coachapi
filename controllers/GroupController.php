@@ -1,5 +1,7 @@
 <?php
 namespace app\controllers;
+use app\models\Comments;
+use app\models\Media;
 use app\models\Posts;
 use Yii;
 use yii\web\Controller;
@@ -186,11 +188,84 @@ class GroupController extends ActiveController
                 if(!empty($group_id)){
                     $group = GroupInfo::findOne($group_id);
                     if ($group) {
-//                        $posts = Posts::find()->select([])->where(['user_id'=>$user_id])->all();
+                        $groupUsers = GroupMapping::find()->where(["group_id"=>$group->group_id])->all();
+                        $postData = [];
+                        if($groupUsers){
+                            foreach ($groupUsers as $GroupUser){
+                                $posts = Posts::find()->where(['user_id'=>$GroupUser['user_id']])->all();
+
+                                if($posts){
+                                    foreach ($posts as $post){
+
+                                        // post image or video url drtails section
+                                        $postMedia = Media::find()->where(['post_id'=>$post['post_id']])->all();
+                                        $mediaDetails = [];
+                                        if($postMedia){
+                                            foreach ($postMedia as $media){
+                                                array_push($mediaDetails,array("url" => $media['url']));
+                                            }
+                                        }
+
+                                        //post comments details section
+                                        $comments = Comments::find()->where(['post_id'=>$post['post_id']])->all();
+                                        $commentDetails = [];
+                                        if($comments){
+                                            foreach ($comments as $comment){
+                                                $user = UserInfo::findOne(["user_id" => $comment['user_id']]);
+                                                // for date time to devide date and time different
+                                                if(!empty($comment['created_date'])){
+                                                    $timestamp = strtotime($comment['created_date']);
+                                                    $date = date('d/m/Y', $timestamp);
+                                                    $time =  date('h:i', $timestamp);
+                                                }else{
+                                                    $date = "";
+                                                    $time =  "";
+                                                }
+                                                array_push($commentDetails,array(
+                                                    "commentId" => $comment['id'],
+                                                    "commentedBy" => $comment['user_id'],
+                                                    "commentByName" => $user->first_name,
+                                                    "comment" => $comment['comment_text'],
+                                                    "commentTime" => $time,
+                                                    "commentDate" => $date,
+                                                ));
+                                            }
+                                        }
+                                        $usersInfo = UserInfo::findOne($post['user_id']);
+                                        $postDetails = [
+                                            "postId" => $post['post_id'],
+                                            "postName" => $post['post_title'],
+                                            "postType" => $post['post_type'],
+                                            "postDesc" => $post['post_description'],
+                                            "media" => $mediaDetails,
+                                            "likes" => $post['likes_count'],
+                                            "comments" => $post['comment_count'],
+                                            "comment" => $commentDetails,
+                                            "postByUserId" => $post['user_id'],
+                                            "postByUserName" => $usersInfo->first_name,
+                                        ];
+                                        array_push($postData,$postDetails);
+                                    }
+                                }
+                            }
+                        }
+                        $groupMembers = GroupMapping::find()->where(["group_id"=>$group->group_id])->all();
+                        $membersList = [];
+                        if($groupMembers){
+                            foreach ($groupMembers as $member){
+                                $usersDetail = UserInfo::findOne($member['user_id']);
+                                array_push($membersList,array(
+                                    "memberId" => $member['user_id'],
+                                    "memberName" => $usersDetail->first_name,
+                                ));
+                            }
+                        }
                         $groupData = [
                             "groupId" => $group->group_id,
                             "groupName" => $group->group_name,
                             "groupImage" => $group->group_image,
+                            "posts" => $postData,
+                            "groupMembersList" => $membersList,
                         ];
                         $result = [
                             "code" => 200,
@@ -226,26 +301,6 @@ class GroupController extends ActiveController
             ];
         }
         echo JSON::encode($result);
-//        $model = GroupInfo::find()->select(['group_name','group_id','group_image'])->All();
-//        $data = [];
-//        if(!empty($model)){
-//            foreach ($model as $user){
-//                $countuser = GroupMapping::findAll(['group_id'=>$user->group_id]);
-//                $countuser = count($countuser);
-//                array_push($data,["group_id"=>$user->group_id,"group_name"=>$user->group_name,"no_of_user"=>$countuser,"group_image"=>$user->group_image]);
-//            };
-//            $result = [
-//                "code" => 200,
-//                "message" => $data,
-//
-//            ];
-//        }else{
-//            $result = [
-//                "code" => 500,
-//                "message" => "no data",
-//            ];
-//        }
-//
     }
 
     //add member to group
