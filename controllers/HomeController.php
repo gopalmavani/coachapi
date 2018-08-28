@@ -98,40 +98,41 @@ class HomeController extends ActiveController
                                             //              "userToken" => $model->user_token,
                                         ];
                                     }else{
+
                                         $result = [
                                             "code" => 500,
-                                            "message" => "failed",
-                                            "errors" => [$model->errors],
+                                            "message" =>  $request['email']." has already been taken. ",
+//                                            "errors" => $request['email']." has already been taken. ",
                                         ];
                                     }
 
                                 }else{
                                     $result = [
                                         "code" => 500,
-                                        "message" => "failed",
-                                        "error" => "Invalid email or password",
+                                        "message" => "email or password can not blank",
+//                                        "error" => "Invalid email or password",
                                     ];
                                 }
                             }else{
                                 $result = [
                                     "code" => 500,
-                                    "message" => "failed",
-                                    "error" => "fullname cannot be blank",
+                                    "message" => "fullname cannot be blank",
+//                                    "error" => "fullname cannot be blank",
                                 ];
                             }
 
                         }else{
                             $result = [
                                 "code" => 500,
-                                "message" => "failed",
-                                "error" => "Invalid userType",
+                                "message" => "Invalid userType",
+//                                "error" => "Invalid userType",
                             ];
                         }
                     }else{
                         $result = [
                             "code" => 500,
-                            "message" => "failed",
-                            "error" => "userType not defined",
+                            "message" => "userType not defined",
+//                            "error" => "userType not defined",
                         ];
                     }
                 }else{
@@ -145,15 +146,15 @@ class HomeController extends ActiveController
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "failed",
-                    "error" => "registerType not defined",
+                    "message" => "registerType not defined",
+//                    "error" => "registerType not defined",
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
-                "message" => "failed",
-                "error" => "data not available",
+                "message" => "data not available",
+//                "error" => "data not available",
             ];
         }
         echo JSON::encode($result);
