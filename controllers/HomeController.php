@@ -138,8 +138,8 @@ class HomeController extends ActiveController
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "failed",
-                        "error" => "Invalid registerType",
+                        "message" => "Invalid registerType",
+//                        "error" => "Invalid registerType",
                     ];
                 }
 
