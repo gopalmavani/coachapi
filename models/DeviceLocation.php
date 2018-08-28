@@ -9,12 +9,15 @@ use Yii;
  *
  * @property int $device_id
  * @property int $user_id
+ * @property string $device_token
  * @property string $device_type
  * @property double $latitude
  * @property double $longitude
  * @property string $event
  * @property string $created_date
  * @property string $modified_date
+ *
+ * @property UserInfo $user
  */
 class DeviceLocation extends \yii\db\ActiveRecord
 {
@@ -32,11 +35,12 @@ class DeviceLocation extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'latitude', 'longitude', 'created_date', 'modified_date'], 'required'],
+            [['user_id', 'created_date', 'modified_date'], 'required'],
             [['user_id'], 'integer'],
             [['latitude', 'longitude'], 'number'],
             [['created_date', 'modified_date'], 'safe'],
-            [['device_type', 'event'], 'string', 'max' => 50],
+            [['device_token', 'device_type', 'event'], 'string', 'max' => 50],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserInfo::className(), 'targetAttribute' => ['user_id' => 'user_id']],
         ];
     }
 
@@ -48,6 +52,7 @@ class DeviceLocation extends \yii\db\ActiveRecord
         return [
             'device_id' => 'Device ID',
             'user_id' => 'User ID',
+            'device_token' => 'Device Token',
             'device_type' => 'Device Type',
             'latitude' => 'Latitude',
             'longitude' => 'Longitude',
@@ -55,5 +60,13 @@ class DeviceLocation extends \yii\db\ActiveRecord
             'created_date' => 'Created Date',
             'modified_date' => 'Modified Date',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUser()
+    {
+        return $this->hasOne(UserInfo::className(), ['user_id' => 'user_id']);
     }
 }
