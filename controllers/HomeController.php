@@ -71,16 +71,25 @@ class HomeController extends ActiveController
                                     $model->modified_date = date('Y-m-d H:i:s');
                                     //          MD5 hash for admin@123 is : e6e061838856bf47e1de730719fb2609
                                     //          $model->user_token = md5(uniqid($model->user_id, true));
+
                                     if ($model->save()) {
                                         $device = new DeviceLocation();
-                                        $device->attributes = $request;
                                         if(isset($request['deviceId'])){
-                                            $model->device_token = $request['deviceId'];
+                                            $device->device_token = $request['deviceId'];
                                         }
+                                        if(isset($request['latitude'])){
+                                            $device->device_token = $request['latitude'];
+                                        }
+                                        if(isset($request['longitude'])){
+                                            $device->device_token = $request['longitude'];
+                                        }
+//                                        $device->attributes = $request;
+
                                         $device->event = "register";
                                         $device->user_id = $model->user_id;
                                         $device->created_date = date('Y-m-d H:i:s');
                                         $device->modified_date = date('Y-m-d H:i:s');
+
                                         $device->save();
                                         $result = [
                                             "code" => 200,
