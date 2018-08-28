@@ -277,12 +277,17 @@ class GroupController extends ActiveController
                                 ));
                             }
                         }
+                        $usersName = UserInfo::findOne($group->user_id);
                         $groupData = [
                             "groupId" => $group->group_id,
                             "groupName" => $group->group_name,
                             "groupImage" => $group->group_image,
                             "posts" => $postData,
+                            "groupAdminId" => $group->user_id,
+                            "groupAdminName" => $usersName->first_name,
+                            "groupAdminUrl" => $usersName->image,
                             "groupMembersList" => $membersList,
+
                         ];
                         $result = [
                             "code" => 200,
