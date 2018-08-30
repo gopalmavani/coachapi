@@ -84,7 +84,7 @@ class FriendController extends ActiveController
                         $result = [
                             "code" => 200,
                             "message" => "success",
-                            "userData" => "no Suggested Friends near you"
+                            "userData" => [],
                         ];
                     }
                 }else{

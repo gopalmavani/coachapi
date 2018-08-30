@@ -661,7 +661,28 @@ class HomeController extends ActiveController
                 $request = JSON::decode(Yii::$app->request->getRawBody());
                 if(isset($request['latitude']) && isset($request['longitude']) && isset($request['deviceToken'])){
                     $model = DeviceLocation::findOne(["user_id" => $user_id]);
-                    if(!empty($model)){
+//                    print_r($request);die;
+                    if(empty($model)){
+                        $device = new DeviceLocation();
+                        $device->attributes = $request;
+                        $device->device_token = $request['deviceToken'];
+                        $device->user_id = $user_id;
+                        $device->event = "register";
+                        $device->created_date = date('Y-m-d H:i:s');
+                        $device->modified_date = date('Y-m-d H:i:s');
+                        if ($device->save()) {
+                            $result = [
+                                "code" => 200,
+                                "message" => "success",
+                            ];
+                        } else {
+                            $result = [
+                                "code" => 500,
+                                "message" => "failed",
+                                "error" => [$device->errors],
+                            ];
+                        }
+                    }else{
                         $model->attributes = $request;
                         $model->user_id = $user_id;
                         $model->event = "register";
@@ -678,26 +699,6 @@ class HomeController extends ActiveController
                                 "code" => 500,
                                 "message" => "failed",
                                 "error" => [$model->errors],
-                            ];
-                        }
-                    }else{
-                        $device = new DeviceLocation();
-                        $device->attributes = $request;
-                        $model->device_token = $request['deviceToken'];
-                        $device->user_id = $user_id;
-                        $model->event = "register";
-                        $device->created_date = date('Y-m-d H:i:s');
-                        $device->modified_date = date('Y-m-d H:i:s');
-                        if ($device->save()) {
-                            $result = [
-                                "code" => 200,
-                                "message" => "success",
-                            ];
-                        } else {
-                            $result = [
-                                "code" => 500,
-                                "message" => "failed",
-                                "error" => [$device->errors],
                             ];
                         }
                     }
