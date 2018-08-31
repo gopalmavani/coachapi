@@ -90,22 +90,22 @@ class FriendController extends ActiveController
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "failed",
-                        "error"=> "latitude or longtitude can not blank"
+//                        "message" => "failed",
+                        "message"=> "latitude or longtitude can not blank"
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "failed",
-                    "error"=> "user not found"
+//                    "message" => "failed",
+                    "message"=> "user not found"
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
-                "message" => "failed",
-                "error"=> "user id can not blank"
+//                "message" => "failed",
+                "message"=> "user id can not blank"
             ];
         }
         echo JSON::encode($result);
@@ -122,44 +122,51 @@ class FriendController extends ActiveController
             $users =  UserInfo::findOne($user_id);
             if($users){
                 $request = JSON::decode(Yii::$app->request->getRawBody());
-                $request_id = $request['friend_user_id'];
-                if(!empty($request_id)){
-                    $friend = FriendsList::findOne(["friend_user_id"=>$request_id,"user_id"=>$user_id]);
-                    $user = UserInfo::findOne(["user_id"=>$request_id]);
-                    if(!empty($user)){
-                        if(empty($friend)){
-                            $model = new FriendsList();
-                            $model->friend_user_id = $request_id;
-                            $model->user_id = $user_id;
-                            if($model->save()){
-                                $result = [
-                                    "code" => 200,
-                                    "status" => "success",
-                                    "friend_request_id" => $model->friend_list_id,
-                                ];
+                if(!empty($request)){
+                    $request_id = $request['friend_user_id'];
+                    if(!empty($request_id)){
+                        $friend = FriendsList::findOne(["friend_user_id"=>$request_id,"user_id"=>$user_id]);
+                        $user = UserInfo::findOne(["user_id"=>$request_id]);
+                        if(!empty($user)){
+                            if(empty($friend)){
+                                $model = new FriendsList();
+                                $model->friend_user_id = $request_id;
+                                $model->user_id = $user_id;
+                                if($model->save()){
+                                    $result = [
+                                        "code" => 200,
+                                        "status" => "success",
+                                        "friend_request_id" => $model->friend_list_id,
+                                    ];
+                                }else{
+                                    $result = [
+                                        "code" => 500,
+                                        "message" => "failed",
+                                        "error"=> $model->errors,
+                                    ];
+                                }
                             }else{
                                 $result = [
                                     "code" => 500,
-                                    "message" => "failed",
-                                    "error"=> $model->errors,
+                                    "message" => "request alreaady sent",
                                 ];
                             }
                         }else{
                             $result = [
                                 "code" => 500,
-                                "message" => "request alreaady sent",
+                                "message" => "requested friend is not found",
                             ];
                         }
                     }else{
                         $result = [
                             "code" => 500,
-                            "message" => "requested friend is not found",
+                            "message" => "request id not found",
                         ];
                     }
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "request id not found",
+                        "message" => "friend_user_id can not blank",
                     ];
                 }
             }else{
@@ -188,33 +195,40 @@ class FriendController extends ActiveController
             $users =  UserInfo::findOne($user_id);
             if($users){
                 $request = JSON::decode(Yii::$app->request->getRawBody());
-                if(isset($request['friend_request_id']) && $request['status'] ){
-                    $response_id = $request['friend_request_id'];
-                    $friend = FriendsList::findOne(["friend_list_id"=>$response_id,"friend_user_id"=>$user_id]);
-                    if(!empty($friend)){
-                        $friend->status = $request['status'];
-                        if($friend->save()){
-                            $result = [
-                                "code" => 200,
-                                "status" => "success",
-                            ];
+                if(isset($request['friend_request_id'])){
+                    if(isset($request['status'])){
+                        $response_id = $request['friend_request_id'];
+                        $friend = FriendsList::findOne(["friend_list_id"=>$response_id,"friend_user_id"=>$user_id]);
+                        if(!empty($friend)){
+                            $friend->status = $request['status'];
+                            if($friend->save()){
+                                $result = [
+                                    "code" => 200,
+                                    "status" => "success",
+                                ];
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "failed",
+                                    "error"=>$friend->errors,
+                                ];
+                            }
                         }else{
                             $result = [
                                 "code" => 500,
-                                "message" => "failed",
-                                "error"=>$friend->errors,
+                                "message" => "request not found",
                             ];
                         }
                     }else{
                         $result = [
                             "code" => 500,
-                            "message" => "request not found",
+                            "message" => "status can not blank",
                         ];
                     }
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "response id not available",
+                        "message" => "friend_request_id can not blank",
                     ];
                 }
             }else{
