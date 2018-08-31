@@ -80,17 +80,29 @@ class GroupController extends ActiveController
                                         "group_id" => $model->group_id
                                     ];
                                 }else{
+                                    $errors ='Error Occured,Please try again later';
+                                    if(isset($GroupMapping->errors)){
+                                        $errors = "";
+                                        foreach ($GroupMapping->errors as $key => $value){
+                                            if($key == 'first_name'){
+                                                $value[0] = 'Full Name cannot be blank.';
+                                            }
+                                            $errors .= $value[0]." and ";
+                                        }
+                                        $errors = rtrim($errors, ' and ');
+                                        $errors = str_replace ('"', "", $errors);
+                                    }
                                     $result = [
                                         "code" => 500,
-                                        "message" => "failed",
-                                        "error"=>$GroupMapping->errors,
+                                        "message" => $errors,
+//                                        "error"=>$GroupMapping->errors,
                                     ];
                                 }
                             }else{
                                 $result = [
                                     "code" => 500,
-                                    "message" => "failed",
-                                    "error"=>"user id ".$user." does not exist",
+//                                    "message" => "failed",
+                                    "message"=>"user id ".$user." does not exist",
                                 ];
                             }
                         }
@@ -101,25 +113,37 @@ class GroupController extends ActiveController
                         ];
                     }
                 }else{
+                    $errors ='Error Occured,Please try again later';
+                    if(isset($model->errors)){
+                        $errors = "";
+                        foreach ($model->errors as $key => $value){
+                            if($key == 'first_name'){
+                                $value[0] = 'Full Name cannot be blank.';
+                            }
+                            $errors .= $value[0]." and ";
+                        }
+                        $errors = rtrim($errors, ' and ');
+                        $errors = str_replace ('"', "", $errors);
+                    }
                     $result = [
                         "code" => 500,
-                        "message" => "failed",
-                        "errors" => [$model->errors],
+                        "message" => $errors,
+//                        "errors" => [$model->errors],
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "failed",
-                    "error"=>"user does not exist",
+//                    "message" => "failed",
+                    "message"=>"user not found",
                 ];
             }
 
         }else{
             $result = [
                 "code" => 500,
-                "message" => "failed",
-                "error" => "user id not available",
+//                "message" => "failed",
+                "message" => "user id can not blank",
             ];
         }
     echo JSON::encode($result);
@@ -152,28 +176,28 @@ class GroupController extends ActiveController
                     $result = [
                         "code" => 200,
                         "message" => "success",
-                        "groupData" => "no group created",
+                        "groupData" => [],
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "failed",
-                    "errors" => "user not found",
+//                    "message" => "failed",
+                    "message" => "user not found",
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
-                "message" => "failed",
-                "errors" => "user id can not blank",
+//                "message" => "failed",
+                "message" => "user id can not blank",
             ];
         }
 
         echo JSON::encode($result);
     }
 
-    //get Group Details
+    //get Group Details of where user is in the group
 
     public function actionGroupDetail()
     {
@@ -297,29 +321,29 @@ class GroupController extends ActiveController
                     }else{
                         $result = [
                             "code" => 500,
-                            "message" => "failed",
-                            "error"=> "group not found"
+//                            "message" => "failed",
+                            "message"=> "group not found"
                         ];
                     }
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "failed",
-                        "error"=> "group id can not blank"
+//                        "message" => "failed",
+                        "message"=> "group id can not blank"
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "failed",
-                    "error"=> "user not found"
+//                    "message" => "failed",
+                    "message"=> "user not found"
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
-                "message" => "failed",
-                "error"=> "user id can not blank"
+//                "message" => "failed",
+                "message"=> "user id can not blank"
             ];
         }
         echo JSON::encode($result);
@@ -331,59 +355,85 @@ class GroupController extends ActiveController
     {
         $headers = Yii::$app->request->headers;
         $user_id = $headers['user_id'];
-        $request = JSON::decode(Yii::$app->request->getRawBody());
-        $group_id = $request['group_id'];
-        if(!empty($user_id && $group_id)){
+        if(!empty($user_id)){
             $users =  UserInfo::findOne($user_id);
+            $request = JSON::decode(Yii::$app->request->getRawBody());
             if($users){
-                $group = GroupInfo::findOne($group_id);
-                if($group){
-                    $grouped = GroupMapping::findOne(["user_id"=>$user_id,"group_id"=>$group_id]);
-                    if(empty($grouped)){
-                        $GroupMapping = new GroupMapping();
-                        $GroupMapping->group_id = $group_id;
-                        $GroupMapping->user_id = $user_id;
-                        $GroupMapping->added_by_user_id = $user_id;
-                        $GroupMapping->created_date = date('Y-m-d H:i:s');
-                        $GroupMapping->modified_date = date('Y-m-d H:i:s');
-                        if($GroupMapping->save()){
-                            $result = [
-                                "code" => 200,
-                                "message" => "success",
-                            ];
+                if((isset($request['group_id'])) && (isset($request['userId']))){
+                    $group_id = $request['group_id'];
+                    $addUserId = $request['userId'];
+                    $addUsers =  UserInfo::findOne($addUserId);
+                    if($addUsers){
+                        $group = GroupInfo::findOne($group_id);
+                        if($group){
+                            $grouped = GroupMapping::findOne(["user_id"=>$addUserId,"group_id"=>$group_id]);
+                            if(empty($grouped)){
+                                $GroupMapping = new GroupMapping();
+                                $GroupMapping->group_id = $group_id;
+                                $GroupMapping->user_id = $addUserId;
+                                $GroupMapping->added_by_user_id = $user_id;
+                                $GroupMapping->created_date = date('Y-m-d H:i:s');
+                                $GroupMapping->modified_date = date('Y-m-d H:i:s');
+                                if($GroupMapping->save()){
+                                    $result = [
+                                        "code" => 200,
+                                        "message" => "success",
+                                    ];
+                                }else{
+                                    $errors ='Error Occured,Please try again later';
+                                    if(isset($GroupMapping->errors)){
+                                        $errors = "";
+                                        foreach ($GroupMapping->errors as $key => $value){
+                                            if($key == 'first_name'){
+                                                $value[0] = 'Full Name cannot be blank.';
+                                            }
+                                            $errors .= $value[0]." and ";
+                                        }
+                                        $errors = rtrim($errors, ' and ');
+                                        $errors = str_replace ('"', "", $errors);
+                                    }
+                                    $result = [
+                                        "code" => 500,
+                                        "message" => $errors,
+//                                    "message" => [$GroupMapping->errors],
+                                    ];
+                                }
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "Already Added Member",
+                                ];
+                            }
                         }else{
                             $result = [
                                 "code" => 500,
-                                "message" => "failed",
-                                "errors" => [$GroupMapping->errors],
+                                "message" => "group not found",
                             ];
                         }
                     }else{
                         $result = [
                             "code" => 500,
-                            "message" => "failed",
-                            "errors" => "Already Added Member",
+                            "message" => "user not found for add to group",
                         ];
                     }
+
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "failed",
-                        "errors" => "group does not exist",
+                        "message" => "group id can not blank ",
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "failed",
-                    "errors" => "user does not exist",
+                    "message" => "user does not exist",
                 ];
             }
 
         }else{
             $result = [
                 "code" => 500,
-                "message" => "failed",
+                "message" => "user id can not blank",
             ];
         }
         echo JSON::encode($result);
@@ -421,15 +471,15 @@ class GroupController extends ActiveController
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "failed",
-                        "error"=>"user does not exist in group"
+//                        "message" => "failed",
+                        "message"=>"user does not exist in group"
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "failed",
-                    "error"=>"user or group does not exist"
+//                    "message" => "failed",
+                    "message"=>"user or group does not exist"
                 ];
             }
         }else{

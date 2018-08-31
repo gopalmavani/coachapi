@@ -84,12 +84,10 @@ class HomeController extends ActiveController
                                             $device->device_token = $request['longitude'];
                                         }
 //                                        $device->attributes = $request;
-
                                         $device->event = "register";
                                         $device->user_id = $model->user_id;
                                         $device->created_date = date('Y-m-d H:i:s');
                                         $device->modified_date = date('Y-m-d H:i:s');
-
                                         $device->save();
                                         $result = [
                                             "code" => 200,
@@ -178,16 +176,6 @@ class HomeController extends ActiveController
                                     if (!empty($user)) {
                                         $user->last_logged_in = date('Y-m-d H:i:s');
                                         $user->save();
-                    //                    if($user->gender == 1){
-                    //                        $user->gender = "Female";
-                    //                    }else{
-                    //                        $user->gender = "male";
-                    //                    }
-                    //                    if($user->is_enabled == 1){
-                    //                        $user->is_enabled = "yes";
-                    //                    }else{
-                    //                        $user->is_enabled = "no";
-                    //                    }
                                         $userDetails = [
                                             "userId"=>$user['user_id'],
                                             "userType"=>$user['user_type'],
@@ -209,42 +197,41 @@ class HomeController extends ActiveController
                                         $result = [
                                             "code" => 200,
                                             "status" => "success",
-//                        "userToken"=>$user->user_token,
                                             "userDetails" => $userDetails,
                                         ];
                                     } else {
                                         $result = [
                                             "code" => 500,
-                                            "message" => "failed",
-                                            "error" => "Invalid user/Password",
+                                            "message" => "Invalid user/Password",
+//                                            "error" => "Invalid user/Password",
                                         ];
                                     }
                                 } else {
                                     $result = [
                                         "code" => 500,
-                                        "message" => "failed",
-                                        "error" => "email and password required",
+                                        "message" => "email and password required",
+//                                        "error" => "email and password required",
                                     ];
                                 }
                             }else{
                                 $result = [
                                     "code" => 500,
-                                    "message" => "failed",
-                                    "error" => "deviceId not defined",
+                                    "message" => "deviceId not defined",
+//                                    "error" => "deviceId not defined",
                                 ];
                             }
                         }else{
                             $result = [
                                 "code" => 500,
-                                "message" => "failed",
-                                "error" => "Invalid deviceType",
+                                "message" => "Invalid deviceType",
+//                                "error" => "Invalid deviceType",
                             ];
                         }
                     }else{
                         $result = [
                             "code" => 500,
-                            "message" => "failed",
-                            "error" => "deviceType not defined",
+                            "message" => "deviceType not defined",
+//                            "error" => "deviceType not defined",
                         ];
                     }
 //                }else{
@@ -264,8 +251,8 @@ class HomeController extends ActiveController
         }else{
             $result = [
                 "code" => 500,
-                "message" => "failed",
-                "error" => "data not available",
+                "message" => "data not available",
+//                "error" => "data not available",
             ];
         }
         echo JSON::encode($result);
@@ -318,129 +305,62 @@ class HomeController extends ActiveController
                                     } else {
                                         $result = [
                                             "code" => 500,
-                                            "message" => "failed",
+//                                            "message" => "Invalid user/socialId",
                                             "error" => "Invalid user/socialId",
                                         ];
                                     }
                                 } else {
                                     $result = [
                                         "code" => 500,
-                                        "message" => "failed",
-                                        "error" => "email and socialId required",
+//                                        "message" => "failed",
+                                        "message" => "email and socialId required",
                                     ];
                                 }
                             }else{
                                 $result = [
                                     "code" => 500,
-                                    "message" => "failed",
-                                    "error" => "deviceId not defined",
+//                                    "message" => "failed",
+                                    "message" => "deviceId not defined",
                                 ];
                             }
                         }else{
                             $result = [
                                 "code" => 500,
-                                "message" => "failed",
-                                "error" => "Invalid deviceType",
+//                                "message" => "failed",
+                                "message" => "Invalid deviceType",
                             ];
                         }
                     }else{
                         $result = [
                             "code" => 500,
-                            "message" => "failed",
-                            "error" => "deviceType not defined",
+//                            "message" => "failed",
+                            "message" => "deviceType not defined",
                         ];
                     }
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "failed",
-                        "error" => "Invalid loginType",
+//                        "message" => "failed",
+                        "message" => "Invalid loginType",
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "failed",
-                    "error" => "loginType not defined",
+//                    "message" => "failed",
+                    "message" => "loginType not defined",
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
-                "message" => "failed",
-                "error" => "data not available",
+//                "message" => "failed",
+                "message" => "data not available",
             ];
         }
         echo JSON::encode($result);
     }
 
-
-
-
-    public function actionSocialLoginbkp()
-    {
-        $result = [];
-        $request = JSON::decode(Yii::$app->request->getRawBody());
-        if((!empty($request['loginType'])) && (!empty($request['deviceId'])) && (!empty($request['email'])) && (!empty($request['deviceType'])) && (!empty($request['socialId']))){
-            if(($request['loginType'] == "facebook" || $request['loginType'] == "google" || $request['loginType'] == "insta" || $request['loginType'] == "linkedin") && ($request['deviceType'] == "ios" || $request['deviceType'] == "android")){
-                if (!empty($request['email']) && (!empty($request['socialId']))){
-                    $user = UserInfo::findOne(["email" => $request['email'],"social_id"=>$request['socialId']]);
-                    if (!empty($user)) {
-                        $user->last_logged_in = date('Y-m-d H:i:s');
-                        $user->save();
-
-                        $userDetails = [
-                            "userId"=>$user['user_id'],
-                            "userType"=>$user['user_type'],
-                            "fullname"=>$user['first_name'].' '.$user['last_name'],
-                            "email"=>$user['email'],
-                            "gender"=> $user->gender,
-                            "dob"=>$user->dob,
-                            "aboutme"=>$user->about_user,
-                            "goals"=>$user->goals,
-                            "focus_area"=>$user->focus_areas,
-                            "location"=>$user->location,
-                            "city"=>$user->city,
-                            "country"=>$user->country,
-                            "profession"=>$user->profession,
-                            "is_verified"=> $user->is_enabled,
-                            "user_profile_image"=>$user->image
-                        ];
-                        $result = [
-                            "code" => 200,
-                            "status" => "success",
-                            "user Id" => $user['user_id'],
-                            "userDetails" => $userDetails,
-                        ];
-                    } else {
-                        $result = [
-                            "code" => 500,
-                            "message" => "failed",
-                            "error" => "Invalid user/social id",
-                        ];
-                    }
-                } else {
-                    $result = [
-                        "code" => 500,
-                        "message" => "failed",
-                        "error" => "email and social id required",
-                    ];
-                }
-            } else {
-                $result = [
-                    "code" => 500,
-                    "message" => "failed",
-                ];
-            }
-        } else {
-            $result = [
-                "code" => 500,
-                "message" => "failed",
-                "error" => "data not available",
-            ];
-        }
-        echo JSON::encode($result);
-    }
 
     //get splash Api As per Required Parameters.
 
@@ -488,10 +408,21 @@ class HomeController extends ActiveController
                                     "message" => "success",
                                 ];
                             }else{
+                                $errors ='Error Occured,Please try again later';
+                                if(isset($device->errors)){
+                                    $errors = "";
+                                    foreach ($device->errors as $key => $value){
+                                        if($key == 'first_name'){
+                                            $value[0] = 'Full Name cannot be blank.';
+                                        }
+                                        $errors .= $value[0]." and ";
+                                    }
+                                    $errors = rtrim($errors, ' and ');
+                                    $errors = str_replace ('"', "", $errors);
+                                }
                                 $result = [
                                     "code" => 500,
-                                    "message" => "failed",
-                                    "errors" => [$device->errors],
+                                    "message" => $errors,
                                 ];
                             }
                         }else{
@@ -507,18 +438,41 @@ class HomeController extends ActiveController
                                     "message" => "success",
                                 ];
                             }else{
+                                $errors ='Error Occured,Please try again later';
+                                if(isset($device->errors)){
+                                    $errors = "";
+                                    foreach ($device->errors as $key => $value){
+                                        if($key == 'first_name'){
+                                            $value[0] = 'Full Name cannot be blank.';
+                                        }
+                                        $errors .= $value[0]." and ";
+                                    }
+                                    $errors = rtrim($errors, ' and ');
+                                    $errors = str_replace ('"', "", $errors);
+                                }
                                 $result = [
                                     "code" => 500,
-                                    "message" => "failed",
-                                    "errors" => [$device->errors],
+                                    "message" => $errors,
                                 ];
                             }
                         }
                     }else{
+                        $errors ='Error Occured,Please try again later';
+                        if(isset($user->errors)){
+                            $errors = "";
+                            foreach ($user->errors as $key => $value){
+
+                                if($key == 'first_name'){
+                                    $value[0] = 'Full Name cannot be blank.';
+                                }
+                                $errors .= $value[0]." and ";
+                            }
+                            $errors = rtrim($errors, ' and ');
+                            $errors = str_replace ('"', "", $errors);
+                        }
                         $result = [
                             "code" => 500,
-                            "message" => "failed",
-                            "errors" =>[$user->errors],
+                            "message" => $errors,
                         ];
                     }
                 }else{
@@ -536,7 +490,7 @@ class HomeController extends ActiveController
         }else{
             $result = [
                 "code" => 500,
-                "message" => "cant get id of user",
+                "message" => "user id can not blank",
             ];
         }
         echo JSON::encode($result);
@@ -564,11 +518,27 @@ class HomeController extends ActiveController
                                 "message" => "success",
                             ];
                         }else{
+                            $errors ='Error Occured,Please try again later';
+                            if(isset($model->errors)){
+                                $errors = "";
+                                foreach ($model->errors as $key => $value){
+                                    if($key == 'first_name'){
+                                        $value[0] = 'Full Name cannot be blank.';
+                                    }
+                                    $errors .= $value[0]." and ";
+                                }
+                                $errors = rtrim($errors, ' and ');
+                                $errors = str_replace ('"', "", $errors);
+                            }
                             $result = [
                                 "code" => 500,
-                                "message" => "failed",
-                                "errors" => [$model->errors],
+                                "message" => $errors,
                             ];
+//                            $result = [
+//                                "code" => 500,
+//                                "message" => "Error Occured,Please try again later",
+////                                "errors" => [$model->errors],
+//                            ];
                         }
                     }
                 }else{
@@ -586,7 +556,7 @@ class HomeController extends ActiveController
         }else{
             $result = [
                 "code" => 500,
-                "message" => "cant get id of user",
+                "message" => "user id can not blank",
             ];
         }
         echo JSON::encode($result);
@@ -605,8 +575,8 @@ class HomeController extends ActiveController
                 if($model->is_active == 0 ){
                     $result = [
                         "code" => 500,
-                        "message" => "failed",
-                        "errors" => "already deactive account",
+//                        "message" => "failed",
+                        "message" => "already deactive account",
                     ];
                 }else{
                     $model->is_active = 0;
@@ -616,10 +586,23 @@ class HomeController extends ActiveController
                             "message" => "success",
                         ];
                     }else{
+                        $errors ='Error Occured,Please try again later';
+                        if(isset($model->errors)){
+                            $errors = "";
+                            foreach ($model->errors as $key => $value){
+
+                                if($key == 'first_name'){
+                                    $value[0] = 'Full Name cannot be blank.';
+                                }
+                                $errors .= $value[0]." and ";
+                            }
+                            $errors = rtrim($errors, ' and ');
+                            $errors = str_replace ('"', "", $errors);
+                        }
                         $result = [
                             "code" => 500,
-                            "message" => "failed",
-                            "errors" => [$model->errors],
+//                            "message" => "failed",
+                            "message" => $errors,
                         ];
                     }
                 }
@@ -632,7 +615,7 @@ class HomeController extends ActiveController
         }else{
             $result = [
                 "code" => 500,
-                "message" => "cant get id of user",
+                "message" => "user id can not blank",
             ];
         }
         echo JSON::encode($result);
@@ -650,66 +633,112 @@ class HomeController extends ActiveController
             if(!empty($user)){
                 $request = JSON::decode(Yii::$app->request->getRawBody());
                 if(isset($request['latitude']) && isset($request['longitude']) && isset($request['deviceToken'])){
-                    $model = DeviceLocation::findOne(["user_id" => $user_id]);
-//                    print_r($request);die;
-                    if(empty($model)){
-                        $device = new DeviceLocation();
-                        $device->attributes = $request;
-                        $device->device_token = $request['deviceToken'];
-                        $device->user_id = $user_id;
-                        $device->event = "register";
-                        $device->created_date = date('Y-m-d H:i:s');
-                        $device->modified_date = date('Y-m-d H:i:s');
-                        if ($device->save()) {
-                            $result = [
-                                "code" => 200,
-                                "message" => "success",
-                            ];
-                        } else {
+                    if(!empty($request['deviceToken'])){
+                        if(!empty($request['latitude'])){
+                            if(!empty($request['longitude'])){
+                                $model = DeviceLocation::findOne(["user_id" => $user_id]);
+                                if(empty($model)){
+                                    $device = new DeviceLocation();
+                                    $device->attributes = $request;
+                                    $device->device_token = $request['deviceToken'];
+                                    $device->user_id = $user_id;
+                                    $device->event = "register";
+                                    $device->created_date = date('Y-m-d H:i:s');
+                                    $device->modified_date = date('Y-m-d H:i:s');
+                                    if ($device->save()) {
+                                        $result = [
+                                            "code" => 200,
+                                            "message" => "success",
+                                        ];
+                                    } else {
+                                        $errors ='Error Occured,Please try again later';
+                                        if(isset($device->errors)){
+                                            $errors = "";
+                                            foreach ($device->errors as $key => $value){
+
+                                                if($key == 'first_name'){
+                                                    $value[0] = 'Full Name cannot be blank.';
+                                                }
+                                                $errors .= $value[0]." and ";
+                                            }
+                                            $errors = rtrim($errors, ' and ');
+                                            $errors = str_replace ('"', "", $errors);
+                                        }
+                                        $result = [
+                                            "code" => 500,
+//                                            "message" => "failed",
+                                            "message" => $errors,
+                                        ];
+                                    }
+                                }else{
+                                    $model->attributes = $request;
+                                    $model->user_id = $user_id;
+                                    $model->event = "register";
+                                    $model->device_token = $request['deviceToken'];
+                                    $model->created_date = date('Y-m-d H:i:s');
+                                    $model->modified_date = date('Y-m-d H:i:s');
+                                    if ($model->save()) {
+                                        $result = [
+                                            "code" => 200,
+                                            "message" => "success",
+                                        ];
+                                    } else {
+                                        $errors ='Error Occured,Please try again later';
+                                        if(isset($model->errors)){
+                                            $errors = "";
+                                            foreach ($model->errors as $key => $value){
+
+                                                if($key == 'first_name'){
+                                                    $value[0] = 'Full Name cannot be blank.';
+                                                }
+                                                $errors .= $value[0]." and ";
+                                            }
+                                            $errors = rtrim($errors, ' and ');
+                                            $errors = str_replace ('"', "", $errors);
+                                        }
+                                        $result = [
+                                            "code" => 500,
+//                                            "message" => "failed",
+                                            "message" => $errors,
+                                        ];
+                                    }
+                                }
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "longitude can not blank",
+                                ];
+                            }
+                        }else{
                             $result = [
                                 "code" => 500,
-                                "message" => "failed",
-                                "error" => [$device->errors],
+                                "message" => "latitude can not blank",
                             ];
                         }
                     }else{
-                        $model->attributes = $request;
-                        $model->user_id = $user_id;
-                        $model->event = "register";
-                        $model->device_token = $request['deviceToken'];
-                        $model->created_date = date('Y-m-d H:i:s');
-                        $model->modified_date = date('Y-m-d H:i:s');
-                        if ($model->save()) {
-                            $result = [
-                                "code" => 200,
-                                "message" => "success",
-                            ];
-                        } else {
-                            $result = [
-                                "code" => 500,
-                                "message" => "failed",
-                                "error" => [$model->errors],
-                            ];
-                        }
+                        $result = [
+                            "code" => 500,
+                            "message" => "deviceToken can not blank",
+                        ];
                     }
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "failed",
+                        "message" => "data can not blank",
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "failed",
-                    "erorr" => "user not found",
+//                    "message" => "failed",
+                    "message" => "user not found",
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
-                "message" => "failed",
-                "erorr" => "user id can not blank",
+//                "message" => "failed",
+                "message" => "user id can not blank",
             ];
         }
 
@@ -771,7 +800,7 @@ class HomeController extends ActiveController
         }else{
             $result = [
                 "code" => 500,
-                "message" => "user not available",
+                "message" => "emailId can not blank",
             ];
         }
         echo JSON::encode($result);

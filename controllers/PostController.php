@@ -43,7 +43,6 @@ class PostController extends ActiveController
 
     public function actionCreatePost(){
         $result = [];
-
         $data = Yii::$app->request->post();
         $headers = Yii::$app->request->headers;
         $user_id = $headers['user_id'];
@@ -73,10 +72,22 @@ class PostController extends ActiveController
                                         "message" => "success",
                                     ];
                                 }else{
+                                    $errors ='Error Occured,Please try again later';
+                                    if(isset($media->errors)){
+                                        $errors = "";
+                                        foreach ($media->errors as $key => $value){
+                                            if($key == 'first_name'){
+                                                $value[0] = 'Full Name cannot be blank.';
+                                            }
+                                            $errors .= $value[0]." and ";
+                                        }
+                                        $errors = rtrim($errors, ' and ');
+                                        $errors = str_replace ('"', "", $errors);
+                                    }
                                     $result = [
                                         "code" => 500,
-                                        "message" => "failed",
-                                        "errors" => [$media->errors],
+                                        "message" => $errors,
+//                                        "errors" => [$media->errors],
                                     ];
                                 }
                             }
@@ -88,24 +99,36 @@ class PostController extends ActiveController
                         ];
                     }
                 }else{
+                    $errors ='Error Occured,Please try again later';
+                    if(isset($model->errors)){
+                        $errors = "";
+                        foreach ($model->errors as $key => $value){
+                            if($key == 'first_name'){
+                                $value[0] = 'Full Name cannot be blank.';
+                            }
+                            $errors .= $value[0]." and ";
+                        }
+                        $errors = rtrim($errors, ' and ');
+                        $errors = str_replace ('"', "", $errors);
+                    }
                     $result = [
                         "code" => 500,
-                        "message" => "failed",
-                        "errors" => [$model->errors],
+                        "message" => $errors,
+//                        "errors" => [$model->errors],
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "failed",
-                    "error" => "user not found"
+//                    "message" => "failed",
+                    "message" => "user not found"
                 ];
             }
 
         }else{
             $result = [
                 "code" => 500,
-                "message" => "failed",
+                "message" => "user id can not blank",
             ];
         }
         echo JSON::encode($result);
@@ -142,10 +165,22 @@ class PostController extends ActiveController
                                         "message" => "Liked Successfully",
                                     ];
                                 }else{
+                                    $errors ='Error Occured,Please try again later';
+                                    if(isset($Posts->errors)){
+                                        $errors = "";
+                                        foreach ($Posts->errors as $key => $value){
+                                            if($key == 'first_name'){
+                                                $value[0] = 'Full Name cannot be blank.';
+                                            }
+                                            $errors .= $value[0]." and ";
+                                        }
+                                        $errors = rtrim($errors, ' and ');
+                                        $errors = str_replace ('"', "", $errors);
+                                    }
                                     $result = [
                                         "code" => 500,
-                                        "message" => "failed",
-                                        "error"=> [$Posts->errors],
+                                        "message" => $errors,
+//                                        "error"=> [$Posts->errors],
                                     ];
                                 }
                             }else{
@@ -165,49 +200,57 @@ class PostController extends ActiveController
                                         "message" => "Disliked Successfully",
                                     ];
                                 }else{
+                                    $errors ='Error Occured,Please try again later';
+                                    if(isset($Posts->errors)){
+                                        $errors = "";
+                                        foreach ($Posts->errors as $key => $value){
+                                            if($key == 'first_name'){
+                                                $value[0] = 'Full Name cannot be blank.';
+                                            }
+                                            $errors .= $value[0]." and ";
+                                        }
+                                        $errors = rtrim($errors, ' and ');
+                                        $errors = str_replace ('"', "", $errors);
+                                    }
                                     $result = [
                                         "code" => 500,
-                                        "message" => "failed",
-                                        "error"=> [$Posts->errors],
+                                        "message" => $errors,
+//                                        "error"=> [$Posts->errors],
                                     ];
                                 }
 
                             }else{
                                 $result = [
                                     "code" => 500,
-                                    "message" => "failed",
+                                    "message" => "Error Occured,Please try again later",
                                 ];
                             }
-//                            $result = [
-//                                "code" => 500,
-//                                "message" => "already Liked",
-//                            ];
                         }
                     }else{
                         $result = [
                             "code" => 500,
-                            "message" => "failed",
-                            "error" => "post not found"
+//                            "message" => "failed",
+                            "message" => "post not found"
                         ];
                     }
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "failed",
-                        "error" => "post id can not blank"
+//                        "message" => "failed",
+                        "message" => "post id can not blank"
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "failed",
-                    "error" => "user not found"
+//                    "message" => "failed",
+                    "message" => "user not found"
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
-                "message" => "failed",
+                "message" => "user id can not blank",
             ];
         }
         echo JSON::encode($result);
@@ -223,8 +266,8 @@ class PostController extends ActiveController
             $users =  UserInfo::findOne($user_id);
             if($users){
                 $request = JSON::decode(Yii::$app->request->getRawBody());
-                $group_id = $request['group_id'];
-                if(!empty($group_id)){
+                if(!empty($request['group_id'])){
+                    $group_id = $request['group_id'];
                     $group = GroupInfo::findOne($group_id);
                     if(!empty($group)){
                         $likeuser = GroupLikes::find()->where(['user_id'=>$user_id,"group_id"=>$group_id])->one();
@@ -244,16 +287,28 @@ class PostController extends ActiveController
                                         "message" => "success",
                                     ];
                                 }else{
+                                    $errors ='Error Occured,Please try again later';
+                                    if(isset($group->errors)){
+                                        $errors = "";
+                                        foreach ($group->errors as $key => $value){
+                                            if($key == 'first_name'){
+                                                $value[0] = 'Full Name cannot be blank.';
+                                            }
+                                            $errors .= $value[0]." and ";
+                                        }
+                                        $errors = rtrim($errors, ' and ');
+                                        $errors = str_replace ('"', "", $errors);
+                                    }
                                     $result = [
                                         "code" => 500,
-                                        "message" => "failed",
-                                        "error"=> [$group->errors],
+                                        "message" => $errors,
+//                                        "error"=> [$group->errors],
                                     ];
                                 }
                             }else{
                                 $result = [
                                     "code" => 500,
-                                    "message" => "failed",
+                                    "message" => "Error Occured,Please try again later",
                                 ];
                             }
                         }else{
@@ -265,28 +320,28 @@ class PostController extends ActiveController
                     }else{
                         $result = [
                             "code" => 500,
-                            "message" => "failed",
-                            "error"=> "group not found",
+//                            "message" => "failed",
+                            "message"=> "group not found",
                         ];
                     }
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "failed",
-                        "error"=> "group id can not blank",
+//                        "message" => "failed",
+                        "message"=> "group id can not blank",
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message" => "failed",
-                    "error"=> "user not found",
+//                    "message" => "failed",
+                    "message"=> "user not found",
                 ];
             }
         }else{
             $result = [
                 "code" => 500,
-                "message" => "failed",
+                "message" => "user id can not blank",
             ];
         }
         echo JSON::encode($result);
@@ -303,8 +358,8 @@ class PostController extends ActiveController
             $users =  UserInfo::findOne($user_id);
             if($users){
                 $request = JSON::decode(Yii::$app->request->getRawBody());
-                $post_id = $request['post_id'];
-                if(!empty($post_id)) {
+                if(!empty($request['post_id'])) {
+                    $post_id = $request['post_id'];
                     $post = Posts::findOne(["post_id" => $post_id]);
                     if(!empty($post)){
                         $model = new Comments();
@@ -321,17 +376,41 @@ class PostController extends ActiveController
                                     "message" => "success",
                                 ];
                             }else{
+                                $errors ='Error Occured,Please try again later';
+                                if(isset($post->errors)){
+                                    $errors = "";
+                                    foreach ($post->errors as $key => $value){
+                                        if($key == 'first_name'){
+                                            $value[0] = 'Full Name cannot be blank.';
+                                        }
+                                        $errors .= $value[0]." and ";
+                                    }
+                                    $errors = rtrim($errors, ' and ');
+                                    $errors = str_replace ('"', "", $errors);
+                                }
                                 $result = [
                                     "code" => 500,
-                                    "message" => "failed",
-                                    "error"=> [$post->errors],
+                                    "message" => $errors,
+//                                    "error"=> [$post->errors],
                                 ];
                             }
                         }else{
+                            $errors ='Error Occured,Please try again later';
+                            if(isset($model->errors)){
+                                $errors = "";
+                                foreach ($model->errors as $key => $value){
+                                    if($key == 'first_name'){
+                                        $value[0] = 'Full Name cannot be blank.';
+                                    }
+                                    $errors .= $value[0]." and ";
+                                }
+                                $errors = rtrim($errors, ' and ');
+                                $errors = str_replace ('"', "", $errors);
+                            }
                             $result = [
                                 "code" => 500,
-                                "message" => "failed",
-                                "error"=> [$model->errors],
+                                "message" => $errors,
+//                                "error"=> [$model->errors],
                             ];
                         }
                     }else{
@@ -474,14 +553,14 @@ class PostController extends ActiveController
                             $result = [
                                 "code" => 200,
                                 "message"=>"success",
-                                "likes" => "no likes available",
+                                "list" => [],
                             ];
                         }
                     }else{
                         $result = [
                             "code" => 500,
-                            "message" => "failed",
-                            "error"=> "post not found",
+//                            "message" => "failed",
+                            "message"=> "post not found",
                         ];
                     }
                 }elseif (isset($request['group_id'])){
@@ -508,21 +587,21 @@ class PostController extends ActiveController
                             $result = [
                                 "code" => 200,
                                 "message"=>"success",
-                                "likes" => "no likes available",
+                                "list" => [],
                             ];
                         }
                     }else{
                         $result = [
                             "code" => 500,
-                            "message" => "failed",
-                            "error"=> "group not found",
+//                            "message" => "failed",
+                            "message"=> "group not found",
                         ];
                     }
                 }else{
                     $result = [
                         "code" => 500,
-                        "message" => "failed",
-                        "error"=> "post id or group id can not blank",
+//                        "message" => "failed",
+                        "message"=> "post id or group id can not blank",
                     ];
                 }
             }else{
