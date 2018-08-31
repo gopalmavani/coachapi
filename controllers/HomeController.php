@@ -166,9 +166,9 @@ class HomeController extends ActiveController
         $result = [];
         $request = JSON::decode(Yii::$app->request->getRawBody());
         if(!empty($request)){
-            if(isset($request['userType'])){
-                $userType = strtolower($request['userType']);
-                if(($userType == "coach") || ($userType == "user")){
+//            if(isset($request['userType'])){
+//                $userType = strtolower($request['userType']);
+//                if(($userType == "coach") || ($userType == "user")){
                     if(isset($request['deviceType'])){
                         $deviceType = strtolower($request['deviceType']);
                         if(($deviceType == "ios" )|| ($deviceType == "android")){
@@ -247,20 +247,20 @@ class HomeController extends ActiveController
                             "error" => "deviceType not defined",
                         ];
                     }
-                }else{
-                    $result = [
-                        "code" => 500,
-                        "message" => "failed",
-                        "error" => "Invalid userType",
-                    ];
-                }
-            }else{
-                $result = [
-                    "code" => 500,
-                    "message" => "failed",
-                    "error" => "userType not defined",
-                ];
-            }
+//                }else{
+//                    $result = [
+//                        "code" => 500,
+//                        "message" => "failed",
+//                        "error" => "Invalid userType",
+//                    ];
+//                }
+//            }else{
+//                $result = [
+//                    "code" => 500,
+//                    "message" => "failed",
+//                    "error" => "userType not defined",
+//                ];
+//            }
         }else{
             $result = [
                 "code" => 500,
@@ -291,16 +291,6 @@ class HomeController extends ActiveController
                                     if (!empty($user)) {
                                         $user->last_logged_in = date('Y-m-d H:i:s');
                                         $user->save();
-                                        //                    if($user->gender == 1){
-                                        //                        $user->gender = "Female";
-                                        //                    }else{
-                                        //                        $user->gender = "male";
-                                        //                    }
-                                        //                    if($user->is_enabled == 1){
-                                        //                        $user->is_enabled = "yes";
-                                        //                    }else{
-                                        //                        $user->is_enabled = "no";
-                                        //                    }
                                         $userDetails = [
                                             "userId"=>$user['user_id'],
                                             "userType"=>$user['user_type'],
@@ -371,7 +361,7 @@ class HomeController extends ActiveController
                 $result = [
                     "code" => 500,
                     "message" => "failed",
-                    "error" => "userType not defined",
+                    "error" => "loginType not defined",
                 ];
             }
         }else{
