@@ -63,6 +63,12 @@ class PostController extends ActiveController
                                 $media->post_id = $model->post_id;
                                 $path = Yii::getAlias('@webroot').'/uploads/media/'.$file->name; //Generate your save file path here;
                                 $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
+                                if(isset($path)){
+                                    $image = explode("/home/ll0qf1ku80up/public_html/", $path);
+                                }else{
+                                    $image = "";
+                                }
+
                                 $media->url = $path;
                                 $media->created_date = date('Y-m-d H:i:s');
                                 $media->modified_date = date('Y-m-d H:i:s');
@@ -457,20 +463,27 @@ class PostController extends ActiveController
                     $postcont = Media::find()->select(["url"])->where(["post_id" => $posts['post_id']])->all();
                     foreach ($postcont as $postImageUrl){
 //                        print_r($postImageUrl);die;
+                        if(isset($postImageUrl['url'])){
+                            $image = explode("/home/ll0qf1ku80up/public_html/", $postImageUrl['url']);
+                        }else{
+                            $image = "";
+                        }
+
                         array_push($postcontent,array(
                             "postType"=>$posts['post_type'],
-                            "post"=>$postImageUrl['url'],
+                            "post"=>$image,
                         ));
                     }
                     //for comments content
                     $comments =[];
                     $commentsCont = Comments::find()->where(["post_id" => $posts['post_id'],"user_id"=>$user_id])->all();
+
                     foreach ($commentsCont as $commnt){
                         array_push($comments,array(
                             "comment_id" => $commnt['id'],
                             "comments" => $commnt['comment_text'],
                             "user_id" => $user_id,
-                            "user_image" => $model->image,
+                            "user_image" => $image,
                         ));
                     }
                     //for time and date different
