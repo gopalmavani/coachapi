@@ -462,7 +462,7 @@ class PostController extends ActiveController
             $model = UserInfo::findOne(["user_id" => $user_id]);
             if(!empty($model)){
                 $postListArray = [];
-                $post_list = Posts::find()->select(["user_id","post_id","created_date","post_type","likes_count"])->where(["user_id" => $user_id])->addOrderBy(['created_date' => SORT_DESC])->all();
+                $post_list = Posts::find()->select(["user_id","post_id","post_title","post_subtitle","post_description","created_date","post_type","likes_count"])->where(["user_id" => $user_id])->addOrderBy(['created_date' => SORT_DESC])->all();
                 foreach ($post_list as $posts){
                     //for post conetnt
                     $postcontent= [];
@@ -480,15 +480,12 @@ class PostController extends ActiveController
                             array_push($postcontent,array(
                                 "postType"=>$posts['post_type'],
                                 "post"=>$image,
+                                "post_title" => $posts['post_title'],
+                                "post_subtitle" => $posts['post_subtitle'],
+                                "post_description" => $posts['post_description'],
                             ));
                         }
-                    }else{
-                        array_push($postcontent,array(
-                            "postType"=>$posts['post_type'],
-                            "post"=>"",
-                        ));
                     }
-
                     //for comments content
                     $comments =[];
                     $commentsCont = Comments::find()->where(["post_id" => $posts['post_id'],"user_id"=>$user_id])->all();
@@ -516,6 +513,7 @@ class PostController extends ActiveController
                         "user_id" => $user_id,
                         "username" => $model->first_name,
                         "user_image" =>$model->image,
+//
                         "date" => $date,
                         "time" => $time,
                         "postContent" => $postcontent,
