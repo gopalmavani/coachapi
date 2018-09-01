@@ -467,19 +467,28 @@ class PostController extends ActiveController
                     //for post conetnt
                     $postcontent= [];
                     $postcont = Media::find()->select(["url"])->where(["post_id" => $posts['post_id']])->all();
-                    foreach ($postcont as $postImageUrl){
+                    if($postcont){
+                        foreach ($postcont as $postImageUrl){
 //                        print_r($postImageUrl);die;
-                        if(isset($postImageUrl['url'])){
-                            $image = explode("/home/ll0qf1ku80up/public_html/", $postImageUrl['url']);
-                        }else{
-                            $image = "";
-                        }
+                            if(isset($postImageUrl['url'])){
+                                $pic = explode("/home/ll0qf1ku80up/public_html/", $postImageUrl['url']);
+                                $image = $pic[0];
+                            }else{
+                                $image = "";
+                            }
 
+                            array_push($postcontent,array(
+                                "postType"=>$posts['post_type'],
+                                "post"=>$image,
+                            ));
+                        }
+                    }else{
                         array_push($postcontent,array(
                             "postType"=>$posts['post_type'],
-                            "post"=>$image,
+                            "post"=>"",
                         ));
                     }
+
                     //for comments content
                     $comments =[];
                     $commentsCont = Comments::find()->where(["post_id" => $posts['post_id'],"user_id"=>$user_id])->all();
