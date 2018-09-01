@@ -462,7 +462,7 @@ class PostController extends ActiveController
             $model = UserInfo::findOne(["user_id" => $user_id]);
             if(!empty($model)){
                 $postListArray = [];
-                $post_list = Posts::find()->select(["user_id","post_id","created_date","post_type","likes_count"])->where(["user_id" => $user_id])->all();
+                $post_list = Posts::find()->select(["user_id","post_id","created_date","post_type","likes_count"])->where(["user_id" => $user_id])->addOrderBy(['created_date' => SORT_DESC])->all();
                 foreach ($post_list as $posts){
                     //for post conetnt
                     $postcontent= [];
