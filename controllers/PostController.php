@@ -521,7 +521,9 @@ class PostController extends ActiveController
                         "user_id" => $user_id,
                         "username" => $model->first_name,
                         "user_image" =>$model->image,
-//
+                        "post_title" => $posts['post_title'],
+                        "post_subtitle" => $posts['post_subtitle'],
+                        "post_description" => $posts['post_description'],
                         "date" => $date,
                         "time" => $time,
                         "postContent" => $postcontent,
