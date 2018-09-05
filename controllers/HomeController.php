@@ -833,7 +833,7 @@ class HomeController extends ActiveController
                                 "city"=>$usersInfo['city'],
                                 "country"=>$usersInfo['country'],
                                 "aboutme"=>$usersInfo['about_user'],
-                                "is_verified"=>$usersInfo['is_active'],
+                                "is_coach"=>$usersInfo['is_active'],
                                 "is_like"=>$usersInfo['likes_count'],
                                 "is_friend"=>1,
                             ));
@@ -887,52 +887,88 @@ class HomeController extends ActiveController
                 if(!empty($request['user_id'])){
                     $Likeuser = UserInfo::findOne(["user_id" => $request['user_id']]);
                     if($Likeuser){
-//                        $usersLikes = UsersLikes::find()->where(['user_id'=>$user_id,"like_user_id"=>$request['user_id']])->one();
-//                        if(empty($usersLikes)){
-//                            $model = new UsersLikes();
-//                            $model->attributes = $request;
-//                            $model->like_user_id = $request['user_id'];
-//                            $model->user_id = $user_id;
-//                            if($model->save()){
-//                                if(empty($Likeuser->likes_count)){ $likes = 0; }else{$likes = $Likeuser->likes_count;}
-//                                $Likeuser->likes_count = $likes + 1;
-//                                if($Likeuser->save()){
-//                                    $result = [
-//                                        "code" => 200,
-//                                        "message" => "Liked Successfully",
-//                                    ];
-//                                }else{
-//                                    $errors ='Error Occured,Please try again later';
-//                                    if(isset($Likeuser->errors)){
-//                                        $errors = "";
-//                                        foreach ($Likeuser->errors as $key => $value){
-//                                            if($key == 'first_name'){
-//                                                $value[0] = 'Full Name cannot be blank.';
-//                                            }
-//                                            $errors .= $value[0]." and ";
-//                                        }
-//                                        $errors = rtrim($errors, ' and ');
-//                                        $errors = str_replace ('"', "", $errors);
-//                                    }
-//                                    $result = [
-//                                        "code" => 500,
-//                                        "message" => $errors,
-////                                        "error"=> [$Posts->errors],
-//                                    ];
-//                                }
-//                            }else{
-//                                $result = [
-//                                    "code" => 500,
-//                                    "message" => "failed",
-//                                ];
-//                            }
-//                        }else{
-//                        }
-                        $result = [
-                            "code" => 200,
-//                        "message"=>"failed",
-                            "message" => "success",
-                        ];
+                        $usersLikes = UsersLikes::find()->where(['user_id'=>$user_id,"like_user_id"=>$request['user_id']])->one();
+                        if(empty($usersLikes)){
+                            $model = new UsersLikes();
+                            $model->attributes = $request;
+                            $model->like_user_id = $request['user_id'];
+                            $model->user_id = $user_id;
+                            if($model->save()){
+                                print_r($Likeuser);die;
+                                if(empty($Likeuser->likes_count)){ $likes = 0; }else{$likes = $Likeuser->likes_count;}
+                                $Likeuser->likes_count = $likes + 1;
+                                if($Likeuser->save()){
+                                    $result = [
+                                        "code" => 200,
+                                        "message" => "Liked Successfully",
+                                    ];
+                                }else{
+                                    $errors ='Error Occured,Please try again later';
+                                    if(isset($Likeuser->errors)){
+                                        $errors = "";
+                                        foreach ($Likeuser->errors as $key => $value){
+                                            if($key == 'first_name'){
+                                                $value[0] = 'Full Name cannot be blank.';
+                                            }
+                                            $errors .= $value[0]." and ";
+                                        }
+                                        $errors = rtrim($errors, ' and ');
+                                        $errors = str_replace ('"', "", $errors);
+                                    }
+                                    $result = [
+                                        "code" => 500,
+                                        "message" => $errors,
+//                                        "error"=> [$Posts->errors],
+                                    ];
+                                }
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "failed",
+                                ];
+                            }
+                        }else{
+                            if($usersLikes->delete()){
+                                if($usersLikes->save()){
+                                    if(empty($Likeuser->likes_count)){ $likes = 0; }else{$likes = $Likeuser->likes_count;}
+                                    $Likeuser->likes_count = $likes - 1;
+                                    if($Likeuser->save()){
+                                        $result = [
+                                            "code" => 200,
+                                            "message" => "Liked Successfully",
+                                        ];
+                                    }else{
+                                        $errors ='Error Occured,Please try again later';
+                                        if(isset($Likeuser->errors)){
+                                            $errors = "";
+                                            foreach ($Likeuser->errors as $key => $value){
+                                                if($key == 'first_name'){
+                                                    $value[0] = 'Full Name cannot be blank.';
+                                                }
+                                                $errors .= $value[0]." and ";
+                                            }
+                                            $errors = rtrim($errors, ' and ');
+                                            $errors = str_replace ('"', "", $errors);
+                                        }
+                                        $result = [
+                                            "code" => 500,
+                                            "message" => $errors,
+//                                        "error"=> [$Posts->errors],
+                                        ];
+                                    }
+                                }else{
+                                    $result = [
+                                        "code" => 500,
+                                        "message" => "failed",
+                                    ];
+                                }
+                            }else{
+                                $result = [
+                                    "code" => 500,
+                                    "message" => "failed",
+                                ];
+                            }
+                        }
                     }else{
                         $result = [
                             "code" => 500,
@@ -940,6 +976,11 @@ class HomeController extends ActiveController
                             "message" => "like user not found",
                         ];
                     }
+                    $result = [
+                        "code" => 200,
+//                        "message"=>"failed",
+                        "message" => "success",
+                    ];
                 }else{
                     $result = [
                         "code" => 500,
@@ -947,6 +988,7 @@ class HomeController extends ActiveController
                         "message" => "user_id cannot blank",
                     ];
                 }
+
             }else{
                 $result = [
                     "code" => 500,
