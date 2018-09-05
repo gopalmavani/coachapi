@@ -19,6 +19,7 @@ use yii\web\HeaderCollection ;
 use yii\web\Application;
 use app\models\Users;
 use app\models\UserInfo;
+
 use app\models\DeviceLocation;
 use yii\web\UploadedFile;
 
@@ -839,29 +840,29 @@ class HomeController extends ActiveController
                         }
                         $result = [
                             "code" => 200,
-                            "message" => "success",
+                            "message" => "message",
                             "userData"=>$data
                         ];
                     }else{
                         $result = [
-                            "code" => 500,
-                            "message"=>"failed",
-                            "error" => "searchKey can not blank",
+                            "code" => 200,
+                            "message"=>"message",
+                            "userData" => [],
                         ];
                     }
 
                 }else{
                     $result = [
                         "code" => 500,
-                        "message"=>"failed",
-                        "error" => "searchKey cannot blank",
+//                        "message"=>"failed",
+                        "message" => "searchKey cannot blank",
                     ];
                 }
             }else{
                 $result = [
                     "code" => 500,
-                    "message"=>"failed",
-                    "error" => "user not found",
+//                    "message"=>"failed",
+                    "message" => "user not found",
                 ];
             }
         }else{
@@ -890,9 +891,8 @@ class HomeController extends ActiveController
 //                        if(empty($usersLikes)){
 //                            $model = new UsersLikes();
 //                            $model->attributes = $request;
-//                            $model->likes_user_id = $request['user_id'];
+//                            $model->like_user_id = $request['user_id'];
 //                            $model->user_id = $user_id;
-//                            print_r($model);die;
 //                            if($model->save()){
 //                                if(empty($Likeuser->likes_count)){ $likes = 0; }else{$likes = $Likeuser->likes_count;}
 //                                $Likeuser->likes_count = $likes + 1;
