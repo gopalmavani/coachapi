@@ -35,6 +35,17 @@ use Yii;
  * @property string $user_token
  * @property string $social_id
  * @property string $image
+ * @property int $likes_count
+ *
+ * @property DeviceLocation[] $deviceLocations
+ * @property FriendsList[] $friendsLists
+ * @property FriendsList[] $friendsLists0
+ * @property GroupInfo[] $groupInfos
+ * @property GroupLikes[] $groupLikes
+ * @property GroupMapping[] $groupMappings
+ * @property PostComments[] $postComments
+ * @property PostLikes[] $postLikes
+ * @property Posts[] $posts
  */
 class UserInfo extends \yii\db\ActiveRecord
 {
@@ -54,7 +65,7 @@ class UserInfo extends \yii\db\ActiveRecord
         return [
             [['first_name', 'email', 'password', 'user_type'], 'required'],
             [['dob', 'last_logged_in', 'date_of_registration', 'created_date', 'modified_date'], 'safe'],
-            [['gender', 'is_active', 'is_enabled'], 'integer'],
+            [['gender', 'is_active', 'is_enabled', 'likes_count'], 'integer'],
             [['first_name', 'last_name', 'password', 'region', 'city', 'country', 'goals', 'user_token', 'social_id'], 'string', 'max' => 50],
             [['email', 'about_user', 'focus_areas', 'location', 'profession', 'image'], 'string', 'max' => 100],
             [['user_type', 'house_number'], 'string', 'max' => 20],
@@ -98,6 +109,79 @@ class UserInfo extends \yii\db\ActiveRecord
             'user_token' => 'User Token',
             'social_id' => 'Social ID',
             'image' => 'Image',
+            'likes_count' => 'Likes Count',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDeviceLocations()
+    {
+        return $this->hasMany(DeviceLocation::className(), ['user_id' => 'user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFriendsLists()
+    {
+        return $this->hasMany(FriendsList::className(), ['user_id' => 'user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFriendsLists0()
+    {
+        return $this->hasMany(FriendsList::className(), ['user_id' => 'user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getGroupInfos()
+    {
+        return $this->hasMany(GroupInfo::className(), ['user_id' => 'user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getGroupLikes()
+    {
+        return $this->hasMany(GroupLikes::className(), ['user_id' => 'user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getGroupMappings()
+    {
+        return $this->hasMany(GroupMapping::className(), ['user_id' => 'user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPostComments()
+    {
+        return $this->hasMany(PostComments::className(), ['user_id' => 'user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPostLikes()
+    {
+        return $this->hasMany(PostLikes::className(), ['user_id' => 'user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPosts()
+    {
+        return $this->hasMany(Posts::className(), ['user_id' => 'user_id']);
     }
 }
