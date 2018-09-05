@@ -503,7 +503,7 @@ class PostController extends ActiveController
                             "comment_id" => $commnt['id'],
                             "comments" => $commnt['comment_text'],
                             "user_id" => $user_id,
-                            "user_image" => $image,
+                            "user_image" => $model->image,
                         ));
                     }
                     //for time and date different

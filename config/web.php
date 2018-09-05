@@ -80,7 +80,8 @@ $config = [
                 'likeList'=>'post/like-list',
                 'deactivateAccount'=>'home/deactive-account',
                 'forgotPassword'=>'home/forget-password',
-                'search' => 'home/search'
+                'search' => 'home/search',
+                'likeProfile'=>'home/like-profile',
 
             ],
         ],

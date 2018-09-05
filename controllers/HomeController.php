@@ -8,6 +8,7 @@
 
 
 namespace app\controllers;
+use app\models\UsersLikes;
 use Yii;
 use yii\web\Controller;
 use  yii\web\Request;
@@ -20,6 +21,7 @@ use app\models\Users;
 use app\models\UserInfo;
 use app\models\DeviceLocation;
 use yii\web\UploadedFile;
+
 use yii\helpers\Url;
 
 class HomeController extends ActiveController
@@ -818,7 +820,7 @@ class HomeController extends ActiveController
             if(!empty($user)){
                 $request = JSON::decode(Yii::$app->request->getRawBody());
                 if(!empty($request['searchKey'])){
-                    $userData = UserInfo::find()->select(['user_id','first_name','image','location','city','country','about_user'])->where(["like","first_name" ,$request['searchKey']])->all();
+                    $userData = UserInfo::find()->select(['user_id','first_name','image','location','city','country','about_user','likes_count','is_active'])->where(["like","first_name" ,$request['searchKey']])->all();
                     if($userData){
                         $data = [];
                         foreach ($userData as $usersInfo){
@@ -829,7 +831,10 @@ class HomeController extends ActiveController
                                 "location"=>$usersInfo['location'],
                                 "city"=>$usersInfo['city'],
                                 "country"=>$usersInfo['country'],
-                                "aboutme"=>$usersInfo['about_user']
+                                "aboutme"=>$usersInfo['about_user'],
+                                "is_verified"=>$usersInfo['is_active'],
+                                "is_like"=>$usersInfo['likes_count'],
+                                "is_friend"=>1,
                             ));
                         }
                         $result = [
@@ -862,8 +867,98 @@ class HomeController extends ActiveController
         }else{
             $result = [
                 "code" => 500,
-                "message"=>"failed",
-                "error" => "user id can not blank",
+//                "message"=>"failed",
+                "message" => "user id can not blank",
+            ];
+        }
+        echo JSON::encode($result);
+    }
+
+    public function actionLikeProfile()
+    {
+        $result = [];
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $user = UserInfo::findOne(["user_id" => $user_id]);
+            if(!empty($user)){
+                $request = JSON::decode(Yii::$app->request->getRawBody());
+                if(!empty($request['user_id'])){
+                    $Likeuser = UserInfo::findOne(["user_id" => $request['user_id']]);
+                    if($Likeuser){
+//                        $usersLikes = UsersLikes::find()->where(['user_id'=>$user_id,"like_user_id"=>$request['user_id']])->one();
+//                        if(empty($usersLikes)){
+//                            $model = new UsersLikes();
+//                            $model->attributes = $request;
+//                            $model->likes_user_id = $request['user_id'];
+//                            $model->user_id = $user_id;
+//                            print_r($model);die;
+//                            if($model->save()){
+//                                if(empty($Likeuser->likes_count)){ $likes = 0; }else{$likes = $Likeuser->likes_count;}
+//                                $Likeuser->likes_count = $likes + 1;
+//                                if($Likeuser->save()){
+//                                    $result = [
+//                                        "code" => 200,
+//                                        "message" => "Liked Successfully",
+//                                    ];
+//                                }else{
+//                                    $errors ='Error Occured,Please try again later';
+//                                    if(isset($Likeuser->errors)){
+//                                        $errors = "";
+//                                        foreach ($Likeuser->errors as $key => $value){
+//                                            if($key == 'first_name'){
+//                                                $value[0] = 'Full Name cannot be blank.';
+//                                            }
+//                                            $errors .= $value[0]." and ";
+//                                        }
+//                                        $errors = rtrim($errors, ' and ');
+//                                        $errors = str_replace ('"', "", $errors);
+//                                    }
+//                                    $result = [
+//                                        "code" => 500,
+//                                        "message" => $errors,
+////                                        "error"=> [$Posts->errors],
+//                                    ];
+//                                }
+//                            }else{
+//                                $result = [
+//                                    "code" => 500,
+//                                    "message" => "failed",
+//                                ];
+//                            }
+//                        }else{
+//                        }
+                        $result = [
+                            "code" => 200,
+//                        "message"=>"failed",
+                            "message" => "success",
+                        ];
+                    }else{
+                        $result = [
+                            "code" => 500,
+//                        "message"=>"failed",
+                            "message" => "like user not found",
+                        ];
+                    }
+                }else{
+                    $result = [
+                        "code" => 500,
+//                        "message"=>"failed",
+                        "message" => "user_id cannot blank",
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+//                    "message"=>"failed",
+                    "message" => "user not found",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+//                "message"=>"failed",
+                "message" => "user id can not blank",
             ];
         }
         echo JSON::encode($result);
