@@ -260,32 +260,38 @@ class FriendController extends ActiveController
                 if(isset($request['user_id'])){
                     $friendsUser = UserInfo::findOne($request['user_id']);
                     if($friendsUser){
-                        $liked = UsersLikes::find()->where(['user_id' => $user_id,'like_user_id' =>$request['user_id']])->one();
-                        $like = 0;
-                        if($liked) {
-                            $like = 1;
-                        }
-                        $friend = FriendsList::find()->select('status')->where(['user_id'=>$user_id,'friend_user_id' => $request['user_id']])->one();
-                        $frnds = 0;
-                        if($friend){
-                            if($friend->status == 1){
-                                $frnds = 1;
-                            }else if($friend->status == 0){
-                                $frnds = 2;
+
+                        $friend = FriendsList::find()->select('status,friend_user_id')->where(['user_id'=> $user_id])->all();
+                        $data = [];
+                        foreach ($friend as $value){
+                            $liked = UsersLikes::find()->where(['user_id' => $user_id,'like_user_id' =>$value['friend_user_id']])->one();
+                            $like = 0;
+                            if($liked) {
+                                $like = 1;
                             }
+                            $frnds = 0;
+                            if($friend){
+                                if($value->status == 1){
+                                    $frnds = 1;
+                                }else if($value->status == 0){
+                                    $frnds = 2;
+                                }
+                            }
+                            $fUser = UserInfo::findOne($value['friend_user_id']);
+                            array_push($data,array(
+                                "user_id"=>$fUser['user_id'],
+                                "userName"=>$fUser['first_name'],
+                                "userImage"=>$fUser['image'],
+                                "location"=>$fUser['location'],
+                                "city"=>$fUser['city'],
+                                "country"=>$fUser['country'],
+                                "about"=>$fUser['about_user'],
+                                "is_coach"=>$fUser['is_active'],
+                                "is_like"=> $like,
+                                "is_friend"=>$frnds,
+                                ));
                         }
-                        $data = [
-                            "user_id"=>$friendsUser['user_id'],
-                            "userName"=>$friendsUser['first_name'],
-                            "userImage"=>$friendsUser['image'],
-                            "location"=>$friendsUser['location'],
-                            "city"=>$friendsUser['city'],
-                            "country"=>$friendsUser['country'],
-                            "about"=>$friendsUser['about_user'],
-                            "is_coach"=>$friendsUser['is_active'],
-                            "is_like"=> $like,
-                            "is_friend"=>$frnds,
-                        ];
+
                         $result = [
                             "code" => 200,
                             "message" => "success",

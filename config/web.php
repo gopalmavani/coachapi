@@ -82,7 +82,8 @@ $config = [
                 'forgotPassword'=>'home/forget-password',
                 'search' => 'home/search',
                 'likeProfile'=>'home/like-profile',
-                'getFriend' => 'friend/get-friend'
+                'getFriend' => 'friend/get-friend',
+                'searchGroup' => 'group/search-group'
 
             ],
         ],

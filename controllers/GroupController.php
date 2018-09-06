@@ -540,4 +540,46 @@ class GroupController extends ActiveController
         echo JSON::encode($result);
     }
 
+
+    //search Group as per group names
+
+    public function actionSearchGroup()
+    {
+        $result = [];
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $user = UserInfo::findOne(["user_id" => $user_id]);
+            if(!empty($user)){
+                $request = JSON::decode(Yii::$app->request->getRawBody());
+                if(isset($request['searchKey'])){
+                    $groupdata = GroupInfo::find()->select('group_name,group_image,group_description')->where(["like","group_name" ,$request['searchKey']])->all();
+                    print_r($groupdata);die;
+                    $data =[
+                        "groupName"=>$groupdata->group_name
+                        ];
+                }else{
+                    $result = [
+                        "code" => 500,
+//                        "message"=>"failed",
+                        "message" => "searchKey cannot blank",
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+//                    "message"=>"failed",
+                    "message" => "user not found",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+//                "message"=>"failed",
+                "message" => "user id can not blank",
+            ];
+        }
+        echo JSON::encode($result);
+    }
+
 }
