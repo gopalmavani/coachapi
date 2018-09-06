@@ -83,7 +83,8 @@ $config = [
                 'search' => 'home/search',
                 'likeProfile'=>'home/like-profile',
                 'getFriend' => 'friend/get-friend',
-                'searchGroup' => 'group/search-group'
+                'searchGroup' => 'group/search-group',
+                'pendingFriendRequest' => 'friend/pending-friend-request',
 
             ],
         ],

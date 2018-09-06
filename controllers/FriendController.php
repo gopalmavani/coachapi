@@ -324,4 +324,61 @@ class FriendController extends ActiveController
         }
         echo JSON::encode($result);
     }
+
+    /*
+     * pending Request of user
+     */
+
+    public function actionPendingFriendRequest()
+    {
+        $result = [];
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $users =  UserInfo::findOne($user_id);
+            if($users){
+                $friendOfUser = FriendsList::find()->select('friend_list_id,user_id,status,friend_user_id')->where(['user_id'=> $user_id,'status'=>0])->all();
+                $userdata = [];
+                foreach ($friendOfUser as $value){
+
+                    $userLike = UsersLikes::find()->where(['user_id'=>$user_id,'like_user_id'=>$value->friend_user_id])->one();
+
+                    $like = 0;
+                    if($userLike) {
+                        $like = 1;
+                    }
+                    $userInfo =  UserInfo::findOne($value->friend_user_id);
+                    array_push($userdata,array(
+                        "userId"=>$userInfo['user_id'],
+                        "userName"=>$userInfo['first_name'],
+                        "userImage"=>$userInfo['image'],
+                        "location"=>$userInfo['location'],
+                        "city"=>$userInfo['city'],
+                        "country"=>$userInfo['country'],
+                        "aboutme"=>$userInfo['about_user'],
+                        "friend_request_id"=>$value->friend_list_id,
+                        "is_coach"=>$userInfo['is_active'],
+                        "is_like"=> $like,
+                    ));
+                }
+                $result = [
+                    "code" => 200,
+                    "message" => "success",
+                    "userData"=>$userdata
+                ];
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "user not found",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "user id can not blank",
+            ];
+        }
+        echo JSON::encode($result);
+    }
+
 }
