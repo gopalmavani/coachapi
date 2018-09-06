@@ -29,8 +29,8 @@ class UsersLikes extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['like_id', 'user_id', 'like_user_id'], 'required'],
-            [['like_id', 'user_id', 'like_user_id'], 'integer'],
+            [['user_id', 'like_user_id'], 'required'],
+            [['user_id', 'like_user_id'], 'integer'],
             [['created_date', 'modified_date'], 'safe'],
         ];
     }
