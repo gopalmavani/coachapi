@@ -556,7 +556,8 @@ class GroupController extends ActiveController
                     $groupdata = GroupInfo::find()->select('group_name,group_image,group_description')->where(["like","group_name" ,$request['searchKey']])->all();
                     print_r($groupdata);die;
                     $data =[
-                        "groupName"=>$groupdata->group_name
+                        "groupName"=>$groupdata->group_name,
+                        ""
                         ];
                 }else{
                     $result = [
