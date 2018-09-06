@@ -532,7 +532,7 @@ class PostController extends ActiveController
                         "postComments" => $comments,
                     ));
                 }
-                print_r($postListArray);die;
+
                 $result = [
                     "code" => 200,
                     "message" => "success",
