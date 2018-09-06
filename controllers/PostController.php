@@ -472,7 +472,7 @@ class PostController extends ActiveController
 //                        print_r($postImageUrl);die;
                             if(isset($postImageUrl['url'])){
                                 $pic = explode("/home/ll0qf1ku80up/public_html/", $postImageUrl['url']);
-                                $image = $pic[0];
+                                $image = $pic[1];
                             }else{
                                 $image = "";
                             }
@@ -480,18 +480,12 @@ class PostController extends ActiveController
                             array_push($postcontent,array(
                                 "postType"=>$posts['post_type'],
                                 "post"=>$image,
-                                "post_title" => $posts['post_title'],
-                                "post_subtitle" => $posts['post_subtitle'],
-                                "post_description" => $posts['post_description'],
                             ));
                         }
                     }else{
                         array_push($postcontent,array(
                             "postType"=>$posts['post_type'],
                             "post"=>"",
-                            "post_title" => $posts['post_title'],
-                            "post_subtitle" => $posts['post_subtitle'],
-                            "post_description" => $posts['post_description'],
                         ));
                     }
                     //for comments content

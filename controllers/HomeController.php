@@ -837,7 +837,9 @@ class HomeController extends ActiveController
                             if($friend){
                                if($friend->status == 1){
                                    $frnds = 1;
-                               }
+                               }else if($friend->status == 0){
+                                    $frnds = 2;
+                                }
                             }
                             array_push($data,array(
                                 "userId"=>$usersInfo['user_id'],
