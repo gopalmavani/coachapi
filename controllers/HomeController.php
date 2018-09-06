@@ -8,6 +8,7 @@
 
 
 namespace app\controllers;
+use app\models\FriendsList;
 use app\models\UsersLikes;
 use Yii;
 use yii\web\Controller;
@@ -824,7 +825,20 @@ class HomeController extends ActiveController
                     $userData = UserInfo::find()->select(['user_id','first_name','image','location','city','country','about_user','likes_count','is_active'])->where(["like","first_name" ,$request['searchKey']])->all();
                     if($userData){
                         $data = [];
+
                         foreach ($userData as $usersInfo){
+                            $liked = UsersLikes::find()->where(['user_id' => $user_id,'like_user_id' =>$usersInfo['user_id']])->one();
+                            $like = 0;
+                            if($liked) {
+                                $like = 1;
+                            }
+                            $friend = FriendsList::find()->select('status')->where(['user_id'=>$user_id,'friend_user_id' => $usersInfo['user_id']])->one();
+                            $frnds = 0;
+                            if($friend){
+                               if($friend->status == 1){
+                                   $frnds = 1;
+                               }
+                            }
                             array_push($data,array(
                                 "userId"=>$usersInfo['user_id'],
                                 "userName"=>$usersInfo['first_name'],
@@ -834,8 +848,8 @@ class HomeController extends ActiveController
                                 "country"=>$usersInfo['country'],
                                 "aboutme"=>$usersInfo['about_user'],
                                 "is_coach"=>$usersInfo['is_active'],
-                                "is_like"=>$usersInfo['likes_count'],
-                                "is_friend"=>1,
+                                "is_like"=> $like,
+                                "is_friend"=>$frnds,
                             ));
                         }
                         $result = [
@@ -875,6 +889,9 @@ class HomeController extends ActiveController
         echo JSON::encode($result);
     }
 
+    /*
+     * for the user can like and dislike users of others
+     */
     public function actionLikeProfile()
     {
         $result = [];
@@ -893,11 +910,17 @@ class HomeController extends ActiveController
                             $model->attributes = $request;
                             $model->like_user_id = $request['user_id'];
                             $model->user_id = $user_id;
+                            $model->created_date = date('Y-m-d H:i:s');
+                            $model->modified_date = date('Y-m-d H:i:s');
                             if($model->save()){
-                                print_r($Likeuser);die;
-                                if(empty($Likeuser->likes_count)){ $likes = 0; }else{$likes = $Likeuser->likes_count;}
+                                if(empty($Likeuser->likes_count)){
+                                    $likes = 0;
+                                }else{
+                                    $likes = $Likeuser->likes_count;
+                                }
                                 $Likeuser->likes_count = $likes + 1;
                                 if($Likeuser->save()){
+
                                     $result = [
                                         "code" => 200,
                                         "message" => "Liked Successfully",
@@ -929,13 +952,16 @@ class HomeController extends ActiveController
                             }
                         }else{
                             if($usersLikes->delete()){
-                                if($usersLikes->save()){
-                                    if(empty($Likeuser->likes_count)){ $likes = 0; }else{$likes = $Likeuser->likes_count;}
-                                    $Likeuser->likes_count = $likes - 1;
+                                if(empty($Likeuser->likes_count)){
+                                    $likes = 0;
+                                }else{
+                                    $likes = $Likeuser->likes_count;
+                                }
+                                $Likeuser->likes_count = $likes - 1;
                                     if($Likeuser->save()){
                                         $result = [
                                             "code" => 200,
-                                            "message" => "Liked Successfully",
+                                            "message" => "Disliked Successfully",
                                         ];
                                     }else{
                                         $errors ='Error Occured,Please try again later';
@@ -953,7 +979,6 @@ class HomeController extends ActiveController
                                         $result = [
                                             "code" => 500,
                                             "message" => $errors,
-//                                        "error"=> [$Posts->errors],
                                         ];
                                     }
                                 }else{
@@ -962,12 +987,6 @@ class HomeController extends ActiveController
                                         "message" => "failed",
                                     ];
                                 }
-                            }else{
-                                $result = [
-                                    "code" => 500,
-                                    "message" => "failed",
-                                ];
-                            }
                         }
                     }else{
                         $result = [
@@ -976,11 +995,6 @@ class HomeController extends ActiveController
                             "message" => "like user not found",
                         ];
                     }
-                    $result = [
-                        "code" => 200,
-//                        "message"=>"failed",
-                        "message" => "success",
-                    ];
                 }else{
                     $result = [
                         "code" => 500,
@@ -988,7 +1002,6 @@ class HomeController extends ActiveController
                         "message" => "user_id cannot blank",
                     ];
                 }
-
             }else{
                 $result = [
                     "code" => 500,
