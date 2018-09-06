@@ -1,8 +1,10 @@
 <?php
 namespace app\controllers;
 use app\models\Comments;
+use app\models\FriendsList;
 use app\models\Media;
 use app\models\Posts;
+use app\models\UsersLikes;
 use Yii;
 use yii\web\Controller;
 use  yii\web\Request;
@@ -553,12 +555,56 @@ class GroupController extends ActiveController
             if(!empty($user)){
                 $request = JSON::decode(Yii::$app->request->getRawBody());
                 if(isset($request['searchKey'])){
-                    $groupdata = GroupInfo::find()->select('group_name,group_image,group_description')->where(["like","group_name" ,$request['searchKey']])->all();
-                    print_r($groupdata);die;
-                    $data =[
-                        "groupName"=>$groupdata->group_name,
-                        ""
-                        ];
+                    $groupDetails =[];
+                    $groupdata = GroupInfo::find()->select('group_id,user_id,group_name,group_image,group_description')->where(["like","group_name" ,$request['searchKey']])->all();
+                    if($groupdata){
+                        foreach ($groupdata as $group){
+                            $groupMember = GroupMapping::find()->where(['group_id'=>$group->group_id])->all();
+                            $userInfo = [];
+                            foreach ($groupMember as $member){
+
+                                $frnds = 0;
+                                $frndsz = FriendsList::find()->where(['user_id'=>$user_id,'friend_user_id'=>$member->user_id])->one();
+                                if($frndsz){
+                                    if($frndsz->status == 1){
+                                        $frnds = 1;
+                                    }else if($frndsz->status == 0){
+                                        $frnds = 2;
+                                    }
+                                }
+                                $userLike = UsersLikes::find()->where(['user_id'=>$user_id,'like_user_id'=>$member->user_id])->one();
+                                $like = 0;
+                                if($userLike) {
+                                    $like = 1;
+                                }
+
+                                $userData = UserInfo::findOne($member->user_id);
+                                array_push($userInfo,array(
+                                    "user_id"=>$userData['user_id'],
+                                    "userName"=>$userData['first_name'],
+                                    "userImage"=>$userData['image'],
+                                    "location"=>$userData['location'],
+                                    "city"=>$userData['city'],
+                                    "country"=>$userData['country'],
+                                    "about"=>$userData['about_user'],
+                                    "is_coach"=>$userData['is_active'],
+                                    "is_like"=>$like,
+                                    "is_friend"=>$frnds,
+                                ));
+                            }
+                            array_push($groupDetails,array(
+                                "groupName" => $group->group_name,
+                                "imageUrl" => $group->group_image,
+                                "about" => $group->group_description,
+                                "userData" => $userInfo
+                            ));
+                        }
+                    }
+                    $result = [
+                        "code" => 200,
+                        "message"=>"success",
+                        "groupData" => $groupDetails
+                    ];
                 }else{
                     $result = [
                         "code" => 500,
