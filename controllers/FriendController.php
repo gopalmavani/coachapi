@@ -14,7 +14,7 @@ use app\models\FriendsList;
 use app\models\GroupMapping;
 use app\models\DeviceLocation;
 use yii\web\UploadedFile;
-
+use app\models\UsersLikes;
 
 class FriendController extends ActiveController
 {
@@ -229,6 +229,78 @@ class FriendController extends ActiveController
                     $result = [
                         "code" => 500,
                         "message" => "friend_request_id can not blank",
+                    ];
+                }
+            }else{
+                $result = [
+                    "code" => 500,
+                    "message" => "user not found",
+                ];
+            }
+        }else{
+            $result = [
+                "code" => 500,
+                "message" => "user id can not blank",
+            ];
+        }
+        echo JSON::encode($result);
+    }
+
+    //get friend list of api
+
+    public function actionGetFriend()
+    {
+        $result = [];
+        $headers = Yii::$app->request->headers;
+        $user_id = $headers['user_id'];
+        if(!empty($user_id)){
+            $users =  UserInfo::findOne($user_id);
+            if($users){
+                $request = JSON::decode(Yii::$app->request->getRawBody());
+                if(isset($request['user_id'])){
+                    $friendsUser = UserInfo::findOne($request['user_id']);
+                    if($friendsUser){
+                        $liked = UsersLikes::find()->where(['user_id' => $user_id,'like_user_id' =>$request['user_id']])->one();
+                        $like = 0;
+                        if($liked) {
+                            $like = 1;
+                        }
+                        $friend = FriendsList::find()->select('status')->where(['user_id'=>$user_id,'friend_user_id' => $request['user_id']])->one();
+                        $frnds = 0;
+                        if($friend){
+                            if($friend->status == 1){
+                                $frnds = 1;
+                            }else if($friend->status == 0){
+                                $frnds = 2;
+                            }
+                        }
+                        $data = [
+                            "user_id"=>$friendsUser['user_id'],
+                            "userName"=>$friendsUser['first_name'],
+                            "userImage"=>$friendsUser['image'],
+                            "location"=>$friendsUser['location'],
+                            "city"=>$friendsUser['city'],
+                            "country"=>$friendsUser['country'],
+                            "about"=>$friendsUser['about_user'],
+                            "is_coach"=>$friendsUser['is_active'],
+                            "is_like"=> $like,
+                            "is_friend"=>$frnds,
+                        ];
+                        $result = [
+                            "code" => 200,
+                            "message" => "success",
+                            "userData"=> $data
+                        ];
+                    }else{
+                        $result = [
+                            "code" => 500,
+                            "message" => "friend not found",
+                        ];
+                    }
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "friend user id can not blank",
                     ];
                 }
             }else{
