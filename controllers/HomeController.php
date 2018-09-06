@@ -825,7 +825,6 @@ class HomeController extends ActiveController
                     $userData = UserInfo::find()->select(['user_id','first_name','image','location','city','country','about_user','likes_count','is_active'])->where(["like","first_name" ,$request['searchKey']])->all();
                     if($userData){
                         $data = [];
-
                         foreach ($userData as $usersInfo){
                             $liked = UsersLikes::find()->where(['user_id' => $user_id,'like_user_id' =>$usersInfo['user_id']])->one();
                             $like = 0;
@@ -846,13 +845,14 @@ class HomeController extends ActiveController
                                 }
                             }
                             array_push($data,array(
-                                "userId"=>$fid,
+                                "userId"=>$usersInfo['user_id'],
                                 "userName"=>$usersInfo['first_name'],
                                 "userImage"=>$usersInfo['image'],
                                 "location"=>$usersInfo['location'],
                                 "city"=>$usersInfo['city'],
                                 "country"=>$usersInfo['country'],
                                 "aboutme"=>$usersInfo['about_user'],
+                                "friend_request_id"=>$fid,
                                 "is_coach"=>$usersInfo['is_active'],
                                 "is_like"=> $like,
                                 "is_friend"=>$frnds,
