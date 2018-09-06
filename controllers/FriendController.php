@@ -270,10 +270,11 @@ class FriendController extends ActiveController
                                 $like = 1;
                             }
                             $frnds = 0;
-                            if($friend){
-                                if($value->status == 1){
+                            $friendofUser = FriendsList::find()->select('status')->where(['user_id'=> $user_id,'friend_user_id'=>$value['friend_user_id']])->one();
+                            if($friendofUser){
+                                if($friendofUser->status == 1){
                                     $frnds = 1;
-                                }else if($value->status == 0){
+                                }else if($friendofUser->status == 0){
                                     $frnds = 2;
                                 }
                             }
