@@ -832,9 +832,13 @@ class HomeController extends ActiveController
                             if($liked) {
                                 $like = 1;
                             }
-                            $friend = FriendsList::find()->select('status')->where(['user_id'=>$user_id,'friend_user_id' => $usersInfo['user_id']])->one();
+                            $friend = FriendsList::find()->select('status,friend_list_id')->where(['user_id'=>$user_id,'friend_user_id' => $usersInfo['user_id']])->one();
+
                             $frnds = 0;
+                            $fid = "";
                             if($friend){
+                                $fid = $friend->friend_list_id;
+
                                if($friend->status == 1){
                                    $frnds = 1;
                                }else if($friend->status == 0){
@@ -842,7 +846,7 @@ class HomeController extends ActiveController
                                 }
                             }
                             array_push($data,array(
-                                "userId"=>$usersInfo['user_id'],
+                                "userId"=>$fid,
                                 "userName"=>$usersInfo['first_name'],
                                 "userImage"=>$usersInfo['image'],
                                 "location"=>$usersInfo['location'],
