@@ -472,7 +472,7 @@ class PostController extends ActiveController
 //                        print_r($postImageUrl);die;
                             if(isset($postImageUrl['url'])){
                                 $pic = explode("/home/ll0qf1ku80up/public_html/", $postImageUrl['url']);
-                                $image = $pic[1];
+                                $image = $pic[0];
                             }else{
                                 $image = "";
                             }
@@ -496,14 +496,15 @@ class PostController extends ActiveController
                     }
                     //for comments content
                     $comments =[];
-                    $commentsCont = Comments::find()->where(["post_id" => $posts['post_id'],"user_id"=>$user_id])->all();
+                    $commentsCont = Comments::find()->where(["post_id" => $posts['post_id']])->all();
 
                     foreach ($commentsCont as $commnt){
+                        $cmntUser = UserInfo::findOne($commnt['user_id']);
                         array_push($comments,array(
                             "comment_id" => $commnt['id'],
                             "comments" => $commnt['comment_text'],
-                            "user_id" => $user_id,
-                            "user_image" => $model->image,
+                            "user_id" => $commnt['user_id'],
+                            "user_image" => $cmntUser->image,
                         ));
                     }
                     //for time and date different
@@ -531,7 +532,7 @@ class PostController extends ActiveController
                         "postComments" => $comments,
                     ));
                 }
-
+                print_r($postListArray);die;
                 $result = [
                     "code" => 200,
                     "message" => "success",
