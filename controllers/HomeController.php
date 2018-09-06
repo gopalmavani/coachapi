@@ -513,9 +513,9 @@ class HomeController extends ActiveController
                 $image = UploadedFile::getInstancesByName('image');
                 if(!empty($image)){
                     foreach ($image as $file){
-                        $path = 'coachapi/uploads/'.$file->name; //Generate your save file path here;
+                        $path = Yii::getAlias('@webroot').'/uploads/'.$file->name; //Generate your save file path here;
                         $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
-                        $model->image = $path;
+                        $model->image = 'coachapi/uploads/'.$file->name;
                         if($model->save()){
                             $result = [
                                 "code" => 200,
