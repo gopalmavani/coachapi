@@ -261,7 +261,7 @@ class FriendController extends ActiveController
                     $friendsUser = UserInfo::findOne($request['user_id']);
                     if($friendsUser){
 
-                        $friend = FriendsList::find()->select('status,friend_user_id')->where(['user_id'=> $user_id])->all();
+                        $friend = FriendsList::find()->select('status,friend_user_id')->where(['user_id'=> $request['user_id']])->all();
                         $data = [];
                         foreach ($friend as $value){
                             $liked = UsersLikes::find()->where(['user_id' => $user_id,'like_user_id' =>$value['friend_user_id']])->one();
