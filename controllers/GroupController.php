@@ -569,7 +569,7 @@ class GroupController extends ActiveController
             $user = UserInfo::findOne(["user_id" => $user_id]);
             if(!empty($user)){
                 $request = JSON::decode(Yii::$app->request->getRawBody());
-                if(isset($request['searchKey'])){
+                if(!empty($request['searchKey'])){
                     $groupDetails =[];
                     $groupdata = GroupInfo::find()->where(["like","group_name" ,$request['searchKey']])->all();
                     if($groupdata){
