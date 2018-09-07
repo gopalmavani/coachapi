@@ -211,8 +211,8 @@ class GroupController extends ActiveController
                 "message" => "user id can not blank",
             ];
         }
-
-        echo JSON::encode($result);
+        return $result;
+//        echo JSON::encode($result);
     }
 
     //get Group Details of where user is in the group
