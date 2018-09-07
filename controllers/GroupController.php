@@ -565,14 +565,13 @@ class GroupController extends ActiveController
     {
         $headers = Yii::$app->request->headers;
         $user_id = $headers['user_id'];
-        $result = [];
         if(!empty($user_id)){
             $user = UserInfo::findOne(["user_id" => $user_id]);
             if(!empty($user)){
                 $request = JSON::decode(Yii::$app->request->getRawBody());
                 if(isset($request['searchKey'])){
                     $groupDetails =[];
-                    $groupdata = GroupInfo::find()->select('group_id,user_id,group_name,group_image,group_description')->where(["like","group_name" ,$request['searchKey']])->all();
+                    $groupdata = GroupInfo::find()->where(["like","group_name" ,$request['searchKey']])->all();
                     if($groupdata){
                         foreach ($groupdata as $group){
                             $groupMember = GroupMapping::find()->where(['group_id'=>$group->group_id])->all();
@@ -593,9 +592,7 @@ class GroupController extends ActiveController
                                     if($userLike) {
                                         $like = 1;
                                     }
-
                                     $userData = UserInfo::findOne($member->user_id);
-
                                     array_push($userInfo,array(
                                         "user_id"=>$userData['user_id'],
                                         "userName"=>$userData['first_name'],
@@ -644,7 +641,9 @@ class GroupController extends ActiveController
                 "message" => "user id can not blank",
             ];
         }
-        echo JSON::encode($result);
+        return $result;
+        //return json_encode($result, JSON_UNESCAPED_SLASHES);
+        //return JSON::encode($result);
     }
 
 }
