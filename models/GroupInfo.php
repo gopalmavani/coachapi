@@ -40,9 +40,10 @@ class GroupInfo extends \yii\db\ActiveRecord
         return [
             [['user_id', 'group_name', 'created_date', 'modified_date'], 'required'],
             [['user_id', 'likes_count', 'group_status'], 'integer'],
+            [['group_image'], 'string'],
             [['created_date', 'modified_date'], 'safe'],
             [['group_name', 'group_category'], 'string', 'max' => 50],
-            [['group_description', 'group_image'], 'string', 'max' => 100],
+            [['group_description'], 'string', 'max' => 100],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserInfo::className(), 'targetAttribute' => ['user_id' => 'user_id']],
         ];
     }

@@ -44,93 +44,102 @@ class GroupController extends ActiveController
     public function actionCreateGroup()
     {
         $result = [];
-        $data = $_POST;
+//        $data = $_POST;
         $headers = Yii::$app->request->headers;
         $user_id = $headers['user_id'];
         if(!empty($user_id)){
            $users =  UserInfo::findOne($user_id);
             if($users){
-                $model = new GroupInfo();
-                $model->attributes = Yii::$app->request->post();
-                $model->user_id = $user_id;
-                $image = UploadedFile::getInstancesByName('group_image');
-                $model->created_date = date('Y-m-d H:i:s');
-                $model->modified_date = date('Y-m-d H:i:s');
-                if(!empty($image)){
-                    foreach ($image as $file){
-                        $path = Yii::getAlias('@webroot').'/uploads/group/'.$file->name; //Generate your save file path here;
-                        $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
-                        $model->group_image = 'coachapi/uploads/group/'.$file->name;
-                    }
-                }
-                if($model->save()){
-                    if(!empty($data['memberList'])){
-                        $datamember = explode(",",$data['memberList']);
-                        foreach ($datamember as $user){
-                            $users_data = UserInfo::findOne($user);
-                            if($users_data){
-                                $GroupMapping = new GroupMapping();
-                                $GroupMapping->user_id = $user;
-                                $GroupMapping->added_by_user_id = $user_id;
-                                $GroupMapping->group_id = $model->group_id;
-                                $GroupMapping->created_date = date('Y-m-d H:i:s');
-                                $GroupMapping->modified_date = date('Y-m-d H:i:s');
-                                if($GroupMapping->save()){
-                                    $result = [
-                                        "code" => 200,
-                                        "message" => "success",
-                                        "group_id" => $model->group_id
-                                    ];
-                                }else{
-                                    $errors ='Error Occured,Please try again later';
-                                    if(isset($GroupMapping->errors)){
-                                        $errors = "";
-                                        foreach ($GroupMapping->errors as $key => $value){
-                                            if($key == 'first_name'){
-                                                $value[0] = 'Full Name cannot be blank.';
+                $request = JSON::decode(Yii::$app->request->getRawBody());
+                if(isset($request['group_name'])){
+                    $model = new GroupInfo();
+                    $model->attributes = $request;
+                    $model->user_id = $user_id;
+//                    $image = UploadedFile::getInstancesByName('group_image');
+                    $model->created_date = date('Y-m-d H:i:s');
+                    $model->modified_date = date('Y-m-d H:i:s');
+//                    if(!empty($image)){
+//                        foreach ($image as $file){
+//                            $path = Yii::getAlias('@webroot').'/uploads/group/'.$file->name; //Generate your save file path here;
+//                            $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
+//                            $model->group_image = 'coachapi/uploads/group/'.$file->name;
+//                        }
+//                    }
+                    if($model->save()){
+                        if(isset($request['memberList'])){
+                            $datamember = explode(",",$request['memberList']);
+                            foreach ($datamember as $user){
+                                $users_data = UserInfo::findOne($user);
+                                if($users_data){
+                                    $GroupMapping = new GroupMapping();
+                                    $GroupMapping->user_id = $user;
+                                    $GroupMapping->added_by_user_id = $user_id;
+                                    $GroupMapping->group_id = $model->group_id;
+                                    $GroupMapping->created_date = date('Y-m-d H:i:s');
+                                    $GroupMapping->modified_date = date('Y-m-d H:i:s');
+                                    if($GroupMapping->save()){
+                                        $result = [
+                                            "code" => 200,
+                                            "message" => "success",
+                                            "group_id" => $model->group_id
+                                        ];
+                                    }else{
+                                        $errors ='Error Occured,Please try again later';
+                                        if(isset($GroupMapping->errors)){
+                                            $errors = "";
+                                            foreach ($GroupMapping->errors as $key => $value){
+                                                if($key == 'first_name'){
+                                                    $value[0] = 'Full Name cannot be blank.';
+                                                }
+                                                $errors .= $value[0]." and ";
                                             }
-                                            $errors .= $value[0]." and ";
+                                            $errors = rtrim($errors, ' and ');
+                                            $errors = str_replace ('"', "", $errors);
                                         }
-                                        $errors = rtrim($errors, ' and ');
-                                        $errors = str_replace ('"', "", $errors);
+                                        $result = [
+                                            "code" => 500,
+                                            "message" => $errors,
+//                                        "error"=>$GroupMapping->errors,
+                                        ];
                                     }
+                                }else{
                                     $result = [
                                         "code" => 500,
-                                        "message" => $errors,
-//                                        "error"=>$GroupMapping->errors,
+//                                    "message" => "failed",
+                                        "message"=>"user id ".$user." does not exist",
                                     ];
                                 }
-                            }else{
-                                $result = [
-                                    "code" => 500,
-//                                    "message" => "failed",
-                                    "message"=>"user id ".$user." does not exist",
-                                ];
                             }
+                        }else{
+                            $result = [
+                                "code" => 200,
+                                "message" => "success",
+                            ];
                         }
                     }else{
+                        $errors ='Error Occured,Please try again later';
+                        if(isset($model->errors)){
+                            $errors = "";
+                            foreach ($model->errors as $key => $value){
+                                if($key == 'first_name'){
+                                    $value[0] = 'Full Name cannot be blank.';
+                                }
+                                $errors .= $value[0]." and ";
+                            }
+                            $errors = rtrim($errors, ' and ');
+                            $errors = str_replace ('"', "", $errors);
+                        }
                         $result = [
-                            "code" => 200,
-                            "message" => "success",
+                            "code" => 500,
+                            "message" => $errors,
+//                        "errors" => [$model->errors],
                         ];
                     }
                 }else{
-                    $errors ='Error Occured,Please try again later';
-                    if(isset($model->errors)){
-                        $errors = "";
-                        foreach ($model->errors as $key => $value){
-                            if($key == 'first_name'){
-                                $value[0] = 'Full Name cannot be blank.';
-                            }
-                            $errors .= $value[0]." and ";
-                        }
-                        $errors = rtrim($errors, ' and ');
-                        $errors = str_replace ('"', "", $errors);
-                    }
                     $result = [
                         "code" => 500,
-                        "message" => $errors,
-//                        "errors" => [$model->errors],
+//                    "message" => "failed",
+                        "message"=>"group name can not blank",
                     ];
                 }
             }else{

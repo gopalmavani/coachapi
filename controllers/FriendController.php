@@ -149,7 +149,7 @@ class FriendController extends ActiveController
                                 if($friend->status == 1){
                                    $msg =  "Unfriend request successfully";
                                 }else{
-                                    $msg =  "cansel request successfully";
+                                    $msg =  "cancel request successfully";
                                 }
                                 if($friend->delete()){
                                     $result = [
