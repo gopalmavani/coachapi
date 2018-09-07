@@ -56,41 +56,39 @@ class PostController extends ActiveController
                     $model->created_date = date('Y-m-d H:i:s');
                     $model->modified_date = date('Y-m-d H:i:s');
                     if($model->save()){
-                        if($data['post_type']){
-                            $image = UploadedFile::getInstancesByName('url');
-                            if(!empty($image)){
-                                foreach ($image as $file){
-                                    $media = new Media();
-                                    $media->post_id = $model->post_id;
-                                    $path = Yii::getAlias('@webroot').'/uploads/media/'.$file->name; //Generate your save file path here;
-                                    $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
-                                    $media->url = $path;
-                                    $media->created_date = date('Y-m-d H:i:s');
-                                    $media->modified_date = date('Y-m-d H:i:s');
-                                    if($media->save()){
-                                        $result = [
-                                            "code" => 200,
-                                            "message" => "success",
-                                        ];
-                                    }else{
-                                        $errors ='Error Occured,Please try again later';
-                                        if(isset($media->errors)){
-                                            $errors = "";
-                                            foreach ($media->errors as $key => $value){
-                                                if($key == 'first_name'){
-                                                    $value[0] = 'Full Name cannot be blank.';
-                                                }
-                                                $errors .= $value[0]." and ";
+                        $image = UploadedFile::getInstancesByName('url');
+                        if(!empty($image)){
+                            foreach ($image as $file){
+                                $media = new Media();
+                                $media->post_id = $model->post_id;
+                                $path = Yii::getAlias('@webroot').'/uploads/media/'.$file->name; //Generate your save file path here;
+                                $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
+                                $media->url = 'coachapi/uploads/media/'.$file->name;
+                                $media->created_date = date('Y-m-d H:i:s');
+                                $media->modified_date = date('Y-m-d H:i:s');
+                                if($media->save()){
+                                    $result = [
+                                        "code" => 200,
+                                        "message" => "success",
+                                    ];
+                                }else{
+                                    $errors ='Error Occured,Please try again later';
+                                    if(isset($media->errors)){
+                                        $errors = "";
+                                        foreach ($media->errors as $key => $value){
+                                            if($key == 'first_name'){
+                                                $value[0] = 'Full Name cannot be blank.';
                                             }
-                                            $errors = rtrim($errors, ' and ');
-                                            $errors = str_replace ('"', "", $errors);
+                                            $errors .= $value[0]." and ";
                                         }
-                                        $result = [
-                                            "code" => 500,
-                                            "message" => $errors,
-//                                        "errors" => [$media->errors],
-                                        ];
+                                        $errors = rtrim($errors, ' and ');
+                                        $errors = str_replace ('"', "", $errors);
                                     }
+                                    $result = [
+                                        "code" => 500,
+                                        "message" => $errors,
+//                                        "errors" => [$media->errors],
+                                    ];
                                 }
                             }
                         }else{
@@ -99,10 +97,6 @@ class PostController extends ActiveController
                                 "message" => "success",
                             ];
                         }
-                        $result = [
-                            "code" => 200,
-                            "message" => "success",
-                        ];
                     }else{
                         $errors ='Error Occured,Please try again later';
                         if(isset($model->errors)){
@@ -136,7 +130,6 @@ class PostController extends ActiveController
                     "message" => "user not found"
                 ];
             }
-
         }else{
             $result = [
                 "code" => 500,
