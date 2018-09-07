@@ -126,7 +126,9 @@ class UsersController extends Controller
             'id'=>$id,
         ]);
     }
-
+    /*
+     *  change password user can change password
+     */
     public function actionChangepassword($id)
     {
         if($id){
@@ -181,6 +183,22 @@ class UsersController extends Controller
         echo JSON::encode($result);
     }
 
+
+    /*
+     * verify email through user verify is active status
+     */
+    public function actionUserverify($id){
+        $this->layout = 'forget_password';
+        $users = UserInfo::findOne($id);
+        if(isset($_POST['is_enabled'])){
+            $users->is_enabled = 1;
+            $users->save();
+        }
+        return $this->render('userverify', [
+            'id'=>$id,
+            'users'=>$users
+        ]);
+    }
 
     /**
      * Finds the Users model based on its primary key value.

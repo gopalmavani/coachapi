@@ -77,6 +77,45 @@ class HomeController extends ActiveController
                                     //          $model->user_token = md5(uniqid($model->user_id, true));
 
                                     if ($model->save()) {
+
+
+                                        $url = "http://scrumwheel.com".Yii::$app->urlManager->createUrl("users/userverify/".$model['user_id']);
+
+                                        $to = $model['email'];
+                                        $subject = "user password reset";
+                                        $headers = "MIME-Version: 1.0" . "\r\n";
+                                        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+                                        $headers .= "From: support@coach.in" . "\r\n";
+                                        $message = '
+			                        <html>
+			                            <body>
+			                                <table style="margin:50px auto;width:500px;">
+			                                    <thead>
+			                                        <tr>
+			                                            <td><h2>CoachApi</h2></td>
+			                                        </tr>
+			                                        <tr><p>Email Verify Details</p></tr>
+			                                    </thead>
+			                                    <tbody>
+			                                        <tr width="100%">
+			                                           <td><h4>for access your account <a href="'.$url.'" target="_blank">click here</a></h4></td>
+			                                        </tr>
+			                                    </tbody>
+			                                </table>
+			                            </body>
+			                        </html>';
+
+                                        if(mail($to, $subject, $message, $headers)){
+                                            $result = [
+                                                "code" => 200,
+                                                "message" => "success",
+                                            ];
+                                        }else{
+                                            $result = [
+                                                "code" => 500,
+                                                "message" => "failed",
+                                            ];
+                                        }
                                         $device = new DeviceLocation();
                                         if(isset($request['deviceId'])){
                                             $device->device_token = $request['deviceId'];
