@@ -463,16 +463,16 @@ class PostController extends ActiveController
                     if($postcont){
                         foreach ($postcont as $postImageUrl){
 //                        print_r($postImageUrl);die;
-                            if(isset($postImageUrl['url'])){
-                                $pic = explode("/home/ll0qf1ku80up/public_html/", $postImageUrl['url']);
-                                $image = $pic[1];
-                            }else{
-                                $image = "";
-                            }
+//                            if(isset($postImageUrl['url'])){
+//                                $pic = explode("/home/ll0qf1ku80up/public_html/", $postImageUrl['url']);
+//                                $image = $pic[1];
+//                            }else{
+//                                $image = "";
+//                            }
 
                             array_push($postcontent,array(
                                 "postType"=>$posts['post_type'],
-                                "post"=>$image,
+                                "post"=>$postImageUrl['url'],
                             ));
                         }
                     }else{
