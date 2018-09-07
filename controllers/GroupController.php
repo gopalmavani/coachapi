@@ -563,9 +563,9 @@ class GroupController extends ActiveController
 
     public function actionSearchGroup()
     {
-        $result = [];
         $headers = Yii::$app->request->headers;
         $user_id = $headers['user_id'];
+        $result = [];
         if(!empty($user_id)){
             $user = UserInfo::findOne(["user_id" => $user_id]);
             if(!empty($user)){
@@ -577,36 +577,38 @@ class GroupController extends ActiveController
                         foreach ($groupdata as $group){
                             $groupMember = GroupMapping::find()->where(['group_id'=>$group->group_id])->all();
                             $userInfo = [];
-                            foreach ($groupMember as $member){
-
-                                $frnds = 0;
-                                $frndsz = FriendsList::find()->where(['user_id'=>$user_id,'friend_user_id'=>$member->user_id])->one();
-                                if($frndsz){
-                                    if($frndsz->status == 1){
-                                        $frnds = 1;
-                                    }else if($frndsz->status == 0){
-                                        $frnds = 2;
+                            if($groupMember){
+                                foreach ($groupMember as $member){
+                                    $frnds = 0;
+                                    $frndsz = FriendsList::find()->where(['user_id'=>$user_id,'friend_user_id'=>$member->user_id])->one();
+                                    if($frndsz){
+                                        if($frndsz->status == 1){
+                                            $frnds = 1;
+                                        }else if($frndsz->status == 0){
+                                            $frnds = 2;
+                                        }
                                     }
-                                }
-                                $userLike = UsersLikes::find()->where(['user_id'=>$user_id,'like_user_id'=>$member->user_id])->one();
-                                $like = 0;
-                                if($userLike) {
-                                    $like = 1;
-                                }
+                                    $userLike = UsersLikes::find()->where(['user_id'=>$user_id,'like_user_id'=>$member->user_id])->one();
+                                    $like = 0;
+                                    if($userLike) {
+                                        $like = 1;
+                                    }
 
-                                $userData = UserInfo::findOne($member->user_id);
-                                array_push($userInfo,array(
-                                    "user_id"=>$userData['user_id'],
-                                    "userName"=>$userData['first_name'],
-                                    "userImage"=>$userData['image'],
-                                    "location"=>$userData['location'],
-                                    "city"=>$userData['city'],
-                                    "country"=>$userData['country'],
-                                    "about"=>$userData['about_user'],
-                                    "is_coach"=>$userData['is_active'],
-                                    "is_like"=>$like,
-                                    "is_friend"=>$frnds,
-                                ));
+                                    $userData = UserInfo::findOne($member->user_id);
+
+                                    array_push($userInfo,array(
+                                        "user_id"=>$userData['user_id'],
+                                        "userName"=>$userData['first_name'],
+                                        "userImage"=>$userData['image'],
+                                        "location"=>$userData['location'],
+                                        "city"=>$userData['city'],
+                                        "country"=>$userData['country'],
+                                        "about"=>$userData['about_user'],
+                                        "is_coach"=>$userData['is_active'],
+                                        "is_like"=>$like,
+                                        "is_friend"=>$frnds,
+                                    ));
+                                }
                             }
                             array_push($groupDetails,array(
                                 "groupName" => $group->group_name,
