@@ -154,8 +154,8 @@ class FriendController extends ActiveController
                                 if($friend->delete()){
                                     $result = [
                                         "code" => 200,
-                                        "message" => "success",
-                                        "data" => $msg
+                                        "status" => "success",
+                                        "message" => $msg
                                     ];
                                 }else{
                                     $result = [
