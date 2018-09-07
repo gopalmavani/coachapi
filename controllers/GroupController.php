@@ -60,7 +60,7 @@ class GroupController extends ActiveController
                     foreach ($image as $file){
                         $path = Yii::getAlias('@webroot').'/uploads/group/'.$file->name; //Generate your save file path here;
                         $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
-                        $model->group_image = $file->name;
+                        $model->group_image = 'coachapi/uploads/group/'.$file->name;
                     }
                 }
                 if($model->save()){
