@@ -350,7 +350,7 @@ class FriendController extends ActiveController
         if(!empty($user_id)){
             $users =  UserInfo::findOne($user_id);
             if($users){
-                $friendOfUser = FriendsList::find()->select('friend_list_id,user_id,status,friend_user_id')->where(['user_id'=> $user_id,'status'=>0])->all();
+                $friendOfUser = FriendsList::find()->select('friend_list_id,user_id,status,friend_user_id')->where(['friend_user_id'=> $user_id,'status'=>0])->all();
                 $userdata = [];
                 foreach ($friendOfUser as $value){
 
@@ -360,7 +360,7 @@ class FriendController extends ActiveController
                     if($userLike) {
                         $like = 1;
                     }
-                    $userInfo =  UserInfo::findOne($value->friend_user_id);
+                    $userInfo =  UserInfo::findOne($value->user_id);
                     array_push($userdata,array(
                         "userId"=>$userInfo['user_id'],
                         "userName"=>$userInfo['first_name'],
