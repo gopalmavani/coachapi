@@ -146,10 +146,23 @@ class FriendController extends ActiveController
                                     ];
                                 }
                             }else{
-                                $result = [
-                                    "code" => 500,
-                                    "message" => "request alreaady sent",
-                                ];
+                                if($friend->status == 1){
+                                   $msg =  "Unfriend request successfully";
+                                }else{
+                                    $msg =  "cansel request successfully";
+                                }
+                                if($friend->delete()){
+                                    $result = [
+                                        "code" => 200,
+                                        "status" => "success",
+                                        "message" => $msg
+                                    ];
+                                }else{
+                                    $result = [
+                                        "code" => 500,
+                                        "message" => "Error occuerd please try again later.",
+                                    ];
+                                }
                             }
                         }else{
                             $result = [
