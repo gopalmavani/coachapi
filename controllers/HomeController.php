@@ -82,7 +82,7 @@ class HomeController extends ActiveController
                                         $url = "http://scrumwheel.com".Yii::$app->urlManager->createUrl("users/userverify/".$model['user_id']);
 
                                         $to = $model['email'];
-                                        $subject = "user password reset";
+                                        $subject = "User Email Verify";
                                         $headers = "MIME-Version: 1.0" . "\r\n";
                                         $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
                                         $headers .= "From: support@coach.in" . "\r\n";
@@ -215,7 +215,7 @@ class HomeController extends ActiveController
                         if(($deviceType == "ios" )|| ($deviceType == "android")){
                             if(!empty($request['deviceId'])){
                                 if (!empty($request['email']) && !empty($request['password'])) {
-                                    $user = UserInfo::findOne(["email" => $request['email'], "password" => md5($request['password'])]);
+                                    $user = UserInfo::findOne(["email" => $request['email'], "password" => md5($request['password']),"is_enabled"=>1]);
                                     if (!empty($user)) {
                                         $user->last_logged_in = date('Y-m-d H:i:s');
                                         $user->save();
@@ -245,7 +245,7 @@ class HomeController extends ActiveController
                                     } else {
                                         $result = [
                                             "code" => 500,
-                                            "message" => "Invalid user/Password",
+                                            "message" => "Invalid user/Password or verify your email",
 //                                            "error" => "Invalid user/Password",
                                         ];
                                     }
@@ -317,7 +317,7 @@ class HomeController extends ActiveController
                         if(($deviceType == "ios" )|| ($deviceType == "android")){
                             if(!empty($request['deviceId'])){
                                 if (!empty($request['email']) && !empty($request['socialId'])) {
-                                    $user = UserInfo::findOne(["email" => $request['email'], "social_id"=>$request['socialId']]);
+                                    $user = UserInfo::findOne(["email" => $request['email'], "social_id"=>$request['socialId'],"is_enabled"=>1]);
                                     if (!empty($user)) {
                                         $user->last_logged_in = date('Y-m-d H:i:s');
                                         $user->save();
@@ -349,7 +349,7 @@ class HomeController extends ActiveController
                                         $result = [
                                             "code" => 500,
 //                                            "message" => "Invalid user/socialId",
-                                            "error" => "Invalid user/socialId",
+                                            "error" => "Invalid user/socialId or verify your email",
                                         ];
                                     }
                                 } else {
