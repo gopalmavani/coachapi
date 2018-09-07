@@ -66,6 +66,13 @@ class GroupController extends ActiveController
 //                        }
 //                    }
                     if($model->save()){
+                        $GroupMapping = new GroupMapping();
+                        $GroupMapping->user_id = $user_id;
+                        $GroupMapping->added_by_user_id = $user_id;
+                        $GroupMapping->group_id = $model->group_id;
+                        $GroupMapping->created_date = date('Y-m-d H:i:s');
+                        $GroupMapping->modified_date = date('Y-m-d H:i:s');
+                        $GroupMapping->save();
                         if(isset($request['memberList'])){
                             $datamember = explode(",",$request['memberList']);
                             foreach ($datamember as $user){
