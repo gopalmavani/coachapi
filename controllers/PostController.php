@@ -63,7 +63,7 @@ class PostController extends ActiveController
                                 $media->post_id = $model->post_id;
                                 $path = Yii::getAlias('@webroot').'/uploads/media/'.$file->name; //Generate your save file path here;
                                 $file->saveAs($path); //Your uploaded file is saved, you can process it further from here
-                                $media->url = 'coachapi/uploads/media/'.$file->name;
+                                $media->url = 'coachapi/web/uploads/media/'.$file->name;
                                 $media->created_date = date('Y-m-d H:i:s');
                                 $media->modified_date = date('Y-m-d H:i:s');
                                 if($media->save()){
