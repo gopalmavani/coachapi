@@ -537,8 +537,8 @@ class PostController extends ActiveController
                 "message" => "user id not available",
             ];
         }
-
-        echo JSON::encode($result);
+        return $result;
+//        echo JSON::encode($result);
     }
 
     //like list of post id
