@@ -576,11 +576,12 @@ class GroupController extends ActiveController
                         foreach ($groupdata as $group){
                             $groupMember = GroupMapping::find()->where(['group_id'=>$group->group_id])->all();
                             $userInfo = [];
+                            $user_is_in = 0;
                             if($groupMember){
                                 foreach ($groupMember as $member){
 
                                     $groupMemberis_in = GroupMapping::find()->where(['group_id'=>$member->group_id,'user_id'=>$user_id])->one();
-                                    $user_is_in = 0;
+
                                     if($groupMemberis_in){
                                         $user_is_in = 1;
                                     }
