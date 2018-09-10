@@ -578,6 +578,13 @@ class GroupController extends ActiveController
                             $userInfo = [];
                             if($groupMember){
                                 foreach ($groupMember as $member){
+
+                                    $groupMemberis_in = GroupMapping::find()->where(['group_id'=>$member->group_id,'user_id'=>$user_id])->one();
+                                    $user_is_in = 0;
+                                    if($groupMemberis_in){
+                                        $user_is_in = 1;
+                                    }
+
                                     $frnds = 0;
                                     $frndsz = FriendsList::find()->where(['user_id'=>$user_id,'friend_user_id'=>$member->user_id])->one();
                                     if($frndsz){
@@ -587,11 +594,13 @@ class GroupController extends ActiveController
                                             $frnds = 2;
                                         }
                                     }
+
                                     $userLike = UsersLikes::find()->where(['user_id'=>$user_id,'like_user_id'=>$member->user_id])->one();
                                     $like = 0;
                                     if($userLike) {
                                         $like = 1;
                                     }
+
                                     $userData = UserInfo::findOne($member->user_id);
                                     array_push($userInfo,array(
                                         "user_id"=>$userData['user_id'],
@@ -608,9 +617,11 @@ class GroupController extends ActiveController
                                 }
                             }
                             array_push($groupDetails,array(
+                                "group_id" => $group->group_id,
                                 "groupName" => $group->group_name,
                                 "imageUrl" => $group->group_image,
                                 "about" => $group->group_description,
+                                "is_user_in_group"=>$user_is_in,
                                 "userData" => $userInfo
                             ));
                         }
