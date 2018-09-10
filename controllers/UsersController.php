@@ -194,7 +194,7 @@ class UsersController extends Controller
             $users->is_enabled = 1;
             if($users->save()){
                 $to = "gopalmavani3@gmail.com";
-                $subject = "User Email verification";
+                $subject = "Email verification";
                 $headers = "MIME-Version: 1.0" . "\r\n";
                 $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
                 $headers .= "From: support@coach.in" . "\r\n";
@@ -206,12 +206,12 @@ class UsersController extends Controller
                                         <tr>
                                             <td><h2>CoachApi</h2></td>
                                         </tr>
-                                        <tr><p>User Email Verification details</p></tr>
+                                        <tr><p>Email Verified details</p></tr>
                                     </thead>
                                     <tbody>
                                         <tr width="100%">
                                             <td>Username :- </td>
-                                           <td>$users->first_name</td>
+                                           <td>'.$users->first_name.'</td>
                                         </tr>
                                     </tbody>
                                 </table>
