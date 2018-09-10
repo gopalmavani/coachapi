@@ -82,7 +82,7 @@ class HomeController extends ActiveController
                                         $url = "http://scrumwheel.com".Yii::$app->urlManager->createUrl("users/userverify/".$model['user_id']);
 
                                         $to = $model['email'];
-                                        $subject = "User Email Verify";
+                                        $subject = "Email Verification";
                                         $headers = "MIME-Version: 1.0" . "\r\n";
                                         $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
                                         $headers .= "From: support@coach.in" . "\r\n";
@@ -94,7 +94,7 @@ class HomeController extends ActiveController
 			                                        <tr>
 			                                            <td><h2>CoachApi</h2></td>
 			                                        </tr>
-			                                        <tr><p>Email Verify Details</p></tr>
+			                                        <tr><p>Email Verification Details</p></tr>
 			                                    </thead>
 			                                    <tbody>
 			                                        <tr width="100%">
