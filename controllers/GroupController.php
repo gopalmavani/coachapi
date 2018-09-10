@@ -69,6 +69,7 @@ class GroupController extends ActiveController
                         $GroupMapping = new GroupMapping();
                         $GroupMapping->user_id = $user_id;
                         $GroupMapping->added_by_user_id = $user_id;
+                        $GroupMapping->created_by_user_id = $user_id;
                         $GroupMapping->group_id = $model->group_id;
                         $GroupMapping->created_date = date('Y-m-d H:i:s');
                         $GroupMapping->modified_date = date('Y-m-d H:i:s');
@@ -81,6 +82,7 @@ class GroupController extends ActiveController
                                     $GroupMapping = new GroupMapping();
                                     $GroupMapping->user_id = $user;
                                     $GroupMapping->added_by_user_id = $user_id;
+                                    $GroupMapping->created_by_user_id = $user_id;
                                     $GroupMapping->group_id = $model->group_id;
                                     $GroupMapping->created_date = date('Y-m-d H:i:s');
                                     $GroupMapping->modified_date = date('Y-m-d H:i:s');
@@ -176,14 +178,20 @@ class GroupController extends ActiveController
         if(!empty($user_id)) {
             $users = UserInfo::findOne($user_id);
             if ($users) {
-                $groupsmapp = GroupMapping::find('group_id')->where(['user_id'=>$user_id])->All();
+//                $groupsmapp = GroupMapping::find('group_id')->where(['user_id'=>$user_id])->All();
+                $connection = Yii::$app->getDb();
+                $sql = "SELECT gm.group_id,count(gm.user_id) as no_of_user,gi.group_name,gi.group_image,gi.user_id FROM group_mapping gm LEFT JOIN group_info gi ON gi.user_id = gm.user_id WHERE gm.user_id = ".$user_id." OR gm.created_by_user_id = ".$user_id." GROUP BY group_id";
+                $groupsmapp = $connection->createCommand($sql)->queryAll();
                 $data = [];
                 if(!empty($groupsmapp)){
                     foreach ($groupsmapp as $user){
-                        $model = GroupInfo::find()->select(['group_name','group_id','group_image','user_id'])->where(['group_id'=>$user->group_id])->one();
-                        $countuser = GroupMapping::findAll(['group_id'=>$user->group_id]);
-                        $countuser = count($countuser);
-                        array_push($data,["groupId"=>$model->group_id,"groupName"=>$model->group_name,"noOfMember"=>$countuser,"imageUrl"=>$model->group_image,'created_by'=>$model->user_id]);
+                        array_push($data,[
+                            "groupId"=>$user['group_id'],
+                            "groupName"=>$user['group_name'],
+                            "noOfMember"=>$user['no_of_user'],
+                            "imageUrl"=>$user['group_image'],
+                            "created_by"=>$user['user_id']
+                        ]);
                     };
                     $result = [
                         "code" => 200,
@@ -390,6 +398,7 @@ class GroupController extends ActiveController
                                 $GroupMapping->group_id = $group_id;
                                 $GroupMapping->user_id = $addUserId;
                                 $GroupMapping->added_by_user_id = $user_id;
+                                $GroupMapping->created_by_user_id = $group->user_id;
                                 $GroupMapping->created_date = date('Y-m-d H:i:s');
                                 $GroupMapping->modified_date = date('Y-m-d H:i:s');
                                 if($GroupMapping->save()){

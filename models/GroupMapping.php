@@ -11,9 +11,13 @@ use Yii;
  * @property int $group_id
  * @property int $user_id
  * @property int $added_by_user_id
+ * @property int $created_by_user_id
  * @property int $status
  * @property string $created_date
  * @property string $modified_date
+ *
+ * @property GroupInfo $group
+ * @property UserInfo $user
  */
 class GroupMapping extends \yii\db\ActiveRecord
 {
@@ -31,9 +35,11 @@ class GroupMapping extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['group_id', 'user_id', 'added_by_user_id', 'created_date', 'modified_date'], 'required'],
-            [['group_id', 'user_id', 'added_by_user_id', 'status'], 'integer'],
+            [['group_id', 'user_id', 'added_by_user_id', 'created_by_user_id'], 'required'],
+            [['group_id', 'user_id', 'added_by_user_id', 'created_by_user_id', 'status'], 'integer'],
             [['created_date', 'modified_date'], 'safe'],
+            [['group_id'], 'exist', 'skipOnError' => true, 'targetClass' => GroupInfo::className(), 'targetAttribute' => ['group_id' => 'group_id']],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserInfo::className(), 'targetAttribute' => ['user_id' => 'user_id']],
         ];
     }
 
@@ -47,9 +53,26 @@ class GroupMapping extends \yii\db\ActiveRecord
             'group_id' => 'Group ID',
             'user_id' => 'User ID',
             'added_by_user_id' => 'Added By User ID',
+            'created_by_user_id' => 'Created By User ID',
             'status' => 'Status',
             'created_date' => 'Created Date',
             'modified_date' => 'Modified Date',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getGroup()
+    {
+        return $this->hasOne(GroupInfo::className(), ['group_id' => 'group_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUser()
+    {
+        return $this->hasOne(UserInfo::className(), ['user_id' => 'user_id']);
     }
 }
