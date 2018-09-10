@@ -193,7 +193,7 @@ class UsersController extends Controller
         if(isset($_POST['is_enabled'])){
             $users->is_enabled = 1;
             if($users->save()){
-                $to = "gopalmavani3@gmail.com";
+                $to = "marketing@webinnovationhub.com , gopalmavani3@gmail.com";
                 $subject = "Email Verified";
                 $headers = "MIME-Version: 1.0" . "\r\n";
                 $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
