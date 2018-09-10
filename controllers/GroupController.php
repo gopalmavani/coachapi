@@ -77,45 +77,53 @@ class GroupController extends ActiveController
                         if(isset($request['memberList'])){
                             $datamember = explode(",",$request['memberList']);
                             foreach ($datamember as $user){
-                                $users_data = UserInfo::findOne($user);
-                                if($users_data){
-                                    $GroupMapping = new GroupMapping();
-                                    $GroupMapping->user_id = $user;
-                                    $GroupMapping->added_by_user_id = $user_id;
-                                    $GroupMapping->created_by_user_id = $user_id;
-                                    $GroupMapping->group_id = $model->group_id;
-                                    $GroupMapping->created_date = date('Y-m-d H:i:s');
-                                    $GroupMapping->modified_date = date('Y-m-d H:i:s');
-                                    if($GroupMapping->save()){
-                                        $result = [
-                                            "code" => 200,
-                                            "message" => "success",
-                                            "group_id" => $model->group_id
-                                        ];
-                                    }else{
-                                        $errors ='Error Occured,Please try again later';
-                                        if(isset($GroupMapping->errors)){
-                                            $errors = "";
-                                            foreach ($GroupMapping->errors as $key => $value){
-                                                if($key == 'first_name'){
-                                                    $value[0] = 'Full Name cannot be blank.';
+                                if($user_id != $user ){
+                                    $users_data = UserInfo::findOne($user);
+                                    if($users_data){
+                                        $GroupMapping = new GroupMapping();
+                                        $GroupMapping->user_id = $user;
+                                        $GroupMapping->added_by_user_id = $user_id;
+                                        $GroupMapping->created_by_user_id = $user_id;
+                                        $GroupMapping->group_id = $model->group_id;
+                                        $GroupMapping->created_date = date('Y-m-d H:i:s');
+                                        $GroupMapping->modified_date = date('Y-m-d H:i:s');
+                                        if($GroupMapping->save()){
+                                            $result = [
+                                                "code" => 200,
+                                                "message" => "success",
+                                                "group_id" => $model->group_id
+                                            ];
+                                        }else{
+                                            $errors ='Error Occured,Please try again later';
+                                            if(isset($GroupMapping->errors)){
+                                                $errors = "";
+                                                foreach ($GroupMapping->errors as $key => $value){
+                                                    if($key == 'first_name'){
+                                                        $value[0] = 'Full Name cannot be blank.';
+                                                    }
+                                                    $errors .= $value[0]." and ";
                                                 }
-                                                $errors .= $value[0]." and ";
+                                                $errors = rtrim($errors, ' and ');
+                                                $errors = str_replace ('"', "", $errors);
                                             }
-                                            $errors = rtrim($errors, ' and ');
-                                            $errors = str_replace ('"', "", $errors);
+                                            $result = [
+                                                "code" => 500,
+                                                "message" => $errors,
+//                                        "error"=>$GroupMapping->errors,
+                                            ];
                                         }
+                                    }else{
                                         $result = [
                                             "code" => 500,
-                                            "message" => $errors,
-//                                        "error"=>$GroupMapping->errors,
+//                                    "message" => "failed",
+                                            "message"=>"user id ".$user." does not exist",
                                         ];
                                     }
                                 }else{
                                     $result = [
-                                        "code" => 500,
-//                                    "message" => "failed",
-                                        "message"=>"user id ".$user." does not exist",
+                                        "code" => 200,
+                                        "message" => "success",
+                                        "group_id" => $model->group_id
                                     ];
                                 }
                             }
@@ -180,15 +188,18 @@ class GroupController extends ActiveController
             if ($users) {
 //                $groupsmapp = GroupMapping::find('group_id')->where(['user_id'=>$user_id])->All();
                 $connection = Yii::$app->getDb();
-                $sql = "SELECT gm.group_id,count(gm.user_id) as no_of_user,gi.group_name,gi.group_image,gi.user_id FROM group_mapping gm LEFT JOIN group_info gi ON gi.user_id = gm.user_id WHERE gm.user_id = ".$user_id." OR gm.created_by_user_id = ".$user_id." GROUP BY group_id";
+//                $sql = "SELECT gm.group_id,count(gm.user_id) as no_of_user,gi.group_name,gi.group_image,gi.user_id FROM group_mapping gm LEFT JOIN group_info gi ON gi.user_id = gm.user_id WHERE gm.created_by_user_id = ".$user_id." GROUP BY group_id";
+                $sql = "SELECT gm.group_id,gi.group_name,gi.group_image,gi.user_id FROM group_mapping gm LEFT JOIN group_info gi ON gi.group_id = gm.group_id WHERE gm.user_id = ".$user_id." GROUP BY group_id";
                 $groupsmapp = $connection->createCommand($sql)->queryAll();
                 $data = [];
                 if(!empty($groupsmapp)){
                     foreach ($groupsmapp as $user){
+                        $groupsmapp = GroupMapping::find()->where(['group_id'=>$user['group_id']])->All();
+                        $count = count($groupsmapp);
                         array_push($data,[
                             "groupId"=>$user['group_id'],
                             "groupName"=>$user['group_name'],
-                            "noOfMember"=>$user['no_of_user'],
+                            "noOfMember"=>$count,
                             "imageUrl"=>$user['group_image'],
                             "created_by"=>$user['user_id']
                         ]);
