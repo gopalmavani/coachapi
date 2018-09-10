@@ -192,7 +192,44 @@ class UsersController extends Controller
         $users = UserInfo::findOne($id);
         if(isset($_POST['is_enabled'])){
             $users->is_enabled = 1;
-            $users->save();
+            if($users->save()){
+                $to = "gopalmavani3@gmail.com";
+                $subject = "User Email verification";
+                $headers = "MIME-Version: 1.0" . "\r\n";
+                $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+                $headers .= "From: support@coach.in" . "\r\n";
+                $message = '
+                        <html>
+                            <body>
+                                <table style="margin:50px auto;width:500px;">
+                                    <thead>
+                                        <tr>
+                                            <td><h2>CoachApi</h2></td>
+                                        </tr>
+                                        <tr><p>User Email Verification details</p></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr width="100%">
+                                            <td>Username :- </td>
+                                           <td>$users->first_name</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </body>
+                        </html>';
+
+                if(mail($to, $subject, $message, $headers)){
+                    $result = [
+                        "code" => 200,
+                        "message" => "success",
+                    ];
+                }else{
+                    $result = [
+                        "code" => 500,
+                        "message" => "failed",
+                    ];
+                }
+            }
         }
         return $this->render('userverify', [
             'id'=>$id,
